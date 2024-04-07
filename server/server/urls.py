@@ -16,8 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from app.views import firebase_data
+from app.views import signup
 
 urlpatterns = [
-    path('firebase/', firebase_data, name='firebase_data'),
+    path('signup', signup, name='signup')
 ]
