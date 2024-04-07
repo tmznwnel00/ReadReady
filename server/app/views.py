@@ -17,11 +17,15 @@ def signup(request):
             id = new_data.get('id')
             password = new_data.get('password')
             
-            
             ref = db.reference('/users')
+            snapshot = ref.order_by_key().equal_to(username).get()
+            if snapshot:
+                return JsonResponse({'error': 'Username is already in use'}, status=400)
+            
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
             ref.child(username).set({
                 'id': id,
-                'password': bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                'password': hashed_password
             })
 
             return JsonResponse({'message': 'User created'})
