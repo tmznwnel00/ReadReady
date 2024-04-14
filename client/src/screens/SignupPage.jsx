@@ -7,13 +7,28 @@ const SignupView = styled.view`
   align-items: center;
   padding: 20px;
 `
-const NameInput = styled.TextInput`
+const NameInput = styled.NameInput`
   width: 70%;
   height: 40px;
   margin:12px;
   borderWidth: 1px solid #ccc;
   padding: 10px;
 `
+const IDInput = styled.IDInput`
+  width: 70%;
+  height: 40px;
+  margin:12px;
+  borderWidth: 1px solid #ccc;
+  padding: 10px;
+`
+const PasswordInput = styled.PasswordInput`
+  width: 70%;
+  height: 40px;
+  margin:12px;
+  borderWidth: 1px solid #ccc;
+  padding: 10px;
+`
+
 const SignupPage = ({ navigation }) => {
   const [name, setName] = useState('')
   const [id,setId] = useState('');
