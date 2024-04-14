@@ -8,7 +8,7 @@ const SignupView = styled.view`
   align-items: center;
   padding: 20px;
 `
-const NameInput = styled.TextInput`
+const EmailInput = styled.TextInput`
   width: 70%;
   height: 40px;
   margin:12px;
@@ -31,7 +31,7 @@ const PasswordInput = styled.TextInput`
 `
 
 const SignupPage = ({ navigation }) => {
-  const [name, setName] = useState('')
+  const [name, setEmail] = useState('')
   const [id,setId] = useState('');
   const [password, setPassword] = useState('');
 
@@ -60,12 +60,12 @@ const SignupPage = ({ navigation }) => {
   return (
     <SignupView>
       <Text>Signup Page</Text>
-      <NameInput
-        placeholeder="Enter your name"
+      <EmailInput
+        placeholeder="Enter your email"
         value={name}
         onChangeText={setName}
         autoCapitalizae="none">
-      </NameInput>
+      </EmailInput>
       <IDInput
         placeholder="Enter your ID"
         value={id}
