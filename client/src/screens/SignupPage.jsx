@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import { View, Text, Button, Alert } from 'react-native';
+import styled from 'styled-components';
 
 const SignupView = styled.view`
   flex: 1;
@@ -7,21 +8,21 @@ const SignupView = styled.view`
   align-items: center;
   padding: 20px;
 `
-const NameInput = styled.NameInput`
+const NameInput = styled.TextInput`
   width: 70%;
   height: 40px;
   margin:12px;
   borderWidth: 1px solid #ccc;
   padding: 10px;
 `
-const IDInput = styled.IDInput`
+const IDInput = styled.TextInput`
   width: 70%;
   height: 40px;
   margin:12px;
   borderWidth: 1px solid #ccc;
   padding: 10px;
 `
-const PasswordInput = styled.PasswordInput`
+const PasswordInput = styled.TextInput`
   width: 70%;
   height: 40px;
   margin:12px;

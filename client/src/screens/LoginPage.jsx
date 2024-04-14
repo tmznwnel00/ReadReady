@@ -10,7 +10,7 @@ const LoginContainer = styled.view`
   padding: 20
 `
 
-const IDInput = styled.div`
+const IDInput = styled.TextInput`
   width: 70%;
   height: 40px;
   margin:12px;
@@ -18,7 +18,7 @@ const IDInput = styled.div`
   padding: 10px;
 `
 
-const PasswordInput = styled.div`
+const PasswordInput = styled.TextInput`
   width:'70%',
   height: 40,
   margin:!2,
