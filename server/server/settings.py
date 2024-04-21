@@ -131,3 +131,5 @@ firebase_admin.initialize_app(
         "databaseURL": "https://readready-14b96-default-rtdb.asia-southeast1.firebasedatabase.app/"
     }
 )
+
+RUN_INDEXING_ON_STARTUP = True
