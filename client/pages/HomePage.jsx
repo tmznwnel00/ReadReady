@@ -16,8 +16,7 @@ export default function HomePage({ navigation }) {
 
         <View style={styles.content}>
             <Text style={styles.title}>Read, Ready?</Text>
-            
-    
+  
             <View style={styles.recommendationSection}>
                 <Text style={styles.recommendationTitle}>Recommendation</Text>
                 <ScrollView vertical={true} style={styles.recommendationsScrollView}>
@@ -47,11 +46,12 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#FEF9F2',
+        justifyContent: 'space-between',
     },
     content: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'flex-start', // Content starts from the top
+        justifyContent: 'flex-start',
     },
     title: {
         fontSize: 50,

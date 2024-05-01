@@ -14,7 +14,7 @@ const Navbar = ({ navigation }) => {
             <TouchableOpacity onPress={() => navigation.navigate('Home')}>
                 <Icon name="home-outline" style={styles.navIcon} onPress={() => navigation.navigate('Home')}/>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Search')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Home')}>
                 <Icon name="account-circle-outline" style={styles.navIcon} />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
@@ -30,12 +30,12 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         alignItems: 'center',
         backgroundColor: '#000',
-        height: 80, 
-    },
+        height: 80,
+    },   
     navIcon: {
         color: '#fff',
         fontSize: 50,
-        marginleft: '5%',
+    
     },
 });
 

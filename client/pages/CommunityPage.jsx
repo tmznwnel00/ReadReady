@@ -33,14 +33,15 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#FEF9F2',
-        alignItems: 'stretch',  // Changed from 'center' to 'stretch' to allow full width
+        alignItems: 'stretch',
+        justifyContent: 'space-between',
     },
     title: {
         marginTop: '20%', 
         marginBottom: 30,
         fontSize: 40,
         fontFamily: 'BIZUDGothic', 
-        alignSelf: 'center', // Ensure title is centered without affecting other components
+        alignSelf: 'center', 
     },
     postsList: {
         width: '100%', // Ensures the list takes up full width
