@@ -1,5 +1,8 @@
 import os
 import json
+import time
+
+from firebase_admin import db
 from urllib.parse import unquote
 
 import bcrypt
@@ -55,6 +58,35 @@ def login_user(request):
 def logout_user(request):
     logout(request)
     return JsonResponse({'message': 'User logged out'})
+
+@csrf_exempt
+def rating_book(request):
+    if request.method == 'POST':    
+        data = json.loads(request.body)
+        username = data.get('username')
+        itemId = data.get('itemId')
+        rating = data.get('rating')
+        description = data.get('description')
+        timestamp = time.time()
+        
+        # have to check username is exist and itemId exist
+        
+        ref = db.reference('/ratings')
+        new_row = ref.push({
+            'username': username,
+            'itemId': itemId,
+            'rating': rating,
+            'description': description,
+            'createdAt': timestamp
+        })
+        new_row_key = new_row.key
+        return JsonResponse({'message': 'Rating created', 'objectId': new_row_key})
+    elif request.method == 'GET':
+        '''
+        TBD
+        '''
+        pass
+    return JsonResponse({'error': 'Invalid request or missing data'}, status=400)
 
 def book_search(request):
     query = request.GET.get('q')
