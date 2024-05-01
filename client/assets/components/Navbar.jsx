@@ -5,21 +5,17 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Example 
 const Navbar = ({ navigation }) => {
     return (
         <View style={styles.navbarContainer}>
-            <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+
                 <Icon name="clipboard-edit-outline" style={styles.navIcon} onPress={() => navigation.navigate('Home')}/>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-                <Icon name="magnify" style={styles.navIcon} onPress={() => navigation.navigate('Home')}/>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+
+                <Icon name="magnify" style={styles.navIcon} onPress={() => navigation.navigate('Search')}/>
+
                 <Icon name="home-outline" style={styles.navIcon} onPress={() => navigation.navigate('Home')}/>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-                <Icon name="account-circle-outline" style={styles.navIcon} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+
+                <Icon name="account-circle-outline" style={styles.navIcon} onPress={() => navigation.navigate('Profile')}/>
+
                 <Icon name="account-group-outline" style={styles.navIcon} onPress={() => navigation.navigate('Community')}/>
-            </TouchableOpacity>
+
         </View>
     );
 };

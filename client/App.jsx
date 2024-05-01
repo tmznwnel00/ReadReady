@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import CommunityPage from './pages/CommunityPage';
 import HomePage from './pages/HomePage';
+import SearchPage from './pages/SearchPage';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -27,6 +28,7 @@ export default function App() {
         <Stack.Screen name="Signup" component={SignupPage} options={{ headerShown: false }} />
         <Stack.Screen name="Community" component={CommunityPage} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomePage} options={{ headerShown: false }} />
+        <Stack.Screen name="Search" component={SearchPage} options={{ headerShown: false }} />
         {/* Define other screens here */}
       </Stack.Navigator>
     </NavigationContainer>
