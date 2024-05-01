@@ -5,6 +5,7 @@ import SignupPage from './pages/SignupPage';
 import CommunityPage from './pages/CommunityPage';
 import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
+import ResultPage from './pages/ResultPage';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -17,6 +18,7 @@ export default function App() {
     'BIZUDGothic': require('./assets/fonts/BIZUDGothic-Regular.ttf'),
     'BlackAndWhite': require('./assets/fonts/BlackAndWhitePicture-Regular.ttf'),
     'BlackHanSans-Regular': require('./assets/fonts/BlackHanSans-Regular.ttf'),
+    'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf')
   });
 
 
@@ -29,6 +31,7 @@ export default function App() {
         <Stack.Screen name="Community" component={CommunityPage} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomePage} options={{ headerShown: false }} />
         <Stack.Screen name="Search" component={SearchPage} options={{ headerShown: false }} />
+        <Stack.Screen name="Result" component={ResultPage} options={{ headerShown: false }}/>
         {/* Define other screens here */}
       </Stack.Navigator>
     </NavigationContainer>

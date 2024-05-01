@@ -1,10 +1,17 @@
 import React, {useState} from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, Image, Platform } from 'react-native';
+import { StyleSheet, View, Text, TextInput, SafeAreaView, TouchableOpacity, Alert, Image, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+import Navbar from '../assets/components/Navbar';
 
 export default function SearchPage({ navigation }) {
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const handleSearch = () => {
+        navigation.navigate('Result', { searchQuery });
+    };
 
     return (
+    <SafeAreaView style={styles.container}>
     <View style={styles.searchContainer}>
         <Text style={styles.title}>SEARCH</Text>
         <View style={styles.inputContainer}>
@@ -12,16 +19,25 @@ export default function SearchPage({ navigation }) {
             <TextInput
                 style={styles.input}
                 placeholder="도서명 또는 작가"
-                //value={word}
-                //onChangeText={searchWord}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                onSubmitEditing={handleSearch}
             />
         </View>
         
     </View>
+    <Navbar navigation={navigation} />
+    </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#FEF9F2',
+        alignItems: 'stretch',
+        justifyContent: 'space-between',
+    },
     searchContainer: {
         flex: 1,
         alignItems: 'center',
@@ -29,7 +45,7 @@ const styles = StyleSheet.create({
         
     },
     title: {
-        marginTop:'30%',
+        marginTop: '20%', 
         fontSize: 40,
         fontFamily: 'BIZUDGothic', 
     },
@@ -44,7 +60,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         flexDirection: 'row',
         alignItems: 'center',
-        borderRadius: 5,
+        borderRadius: 10,
         ...Platform.select({
         ios: {
             shadowColor: 'rgba(0,0,0,0.5)',
@@ -82,3 +98,4 @@ const styles = StyleSheet.create({
             style={styles.button}>
             <Text style={styles.buttonText}>Search</Text>
         </TouchableOpacity> */
+
