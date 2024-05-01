@@ -8,23 +8,25 @@ export default function SignupPage({ navigation }) {
 
     const handleRegister = async () => {
         try {
-            const response = await fetch('https://~~~~~', {
+            const response = await fetch('http://192.168.56.1:8000/signup/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ name, id, password })
+                body: JSON.stringify({ username: id, email, password })
             });
             const data = await response.json();
             if (response.status === 200) {
-                navigation.navigate('Login');
+                Alert.alert('Registration Successful', 'You can now login.');
+                navigation.navigate('LoginPage');  // Navigate to Login Page upon successful registration
             } else {
-                Alert.alert('Failed to register. Please try again.', data.message);
+                Alert.alert('Registration Failed', data.error || 'Please try again.');
             }
         } catch (error) {
             Alert.alert('Network Error', 'Unable to connect to the server. Please try again.');
         }
     };
+    
 
     return (
         <View style={styles.loginContainer}>

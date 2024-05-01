@@ -7,24 +7,25 @@ export default function LoginPage({ navigation }) {
 
     const handleLogin = async () => {
         try {
-            const response = await fetch('https://your-api-url', {
+            const response = await fetch('http://127.0.0.1:8000/login/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ id, password })
+                body: JSON.stringify({ username: id, password })
             });
             const data = await response.json();
             if (response.status === 200) {
                 Alert.alert('Login Successful', `Welcome ${id}!`);
-                navigation.navigate('Main');
+                navigation.navigate('Home');  // Ensure you have a 'Main' route configured in your navigation
             } else {
-                Alert.alert('Login Failed', data.message);
+                Alert.alert('Login Failed', data.error || 'Something went wrong');
             }
         } catch (error) {
             Alert.alert('Network Error', 'Unable to connect to the server. Please try again later.');
         }
     };
+    
 
        return (
         <View style={styles.loginContainer}>

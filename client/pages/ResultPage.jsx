@@ -4,7 +4,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Navbar from '../assets/components/Navbar';
 
 export default function ResultPage({ route, navigation }) {
-    const { searchQuery } = route.params;
+
+    /*const { searchQuery } = route.params;
 
     const [ads, setAds] = useState([]);
 
@@ -16,7 +17,25 @@ export default function ResultPage({ route, navigation }) {
             // Add more ads as needed
         ];
         setAds(fetchedAds);
-    }, []);
+    }, []);*/
+
+    const { searchQuery } = route.params;
+    const [results, setResults] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`http://192.168.x.x:8000/search/?q=${encodeURIComponent(searchQuery)}`);
+                const data = await response.json();
+                setResults(data.results);
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+                setResults([]);
+            }
+        };
+
+        fetchData();
+    }, [searchQuery]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -34,7 +53,7 @@ export default function ResultPage({ route, navigation }) {
             
             <ScrollView style={styles.scrollView}>
             {ads.map((ad) => (
-                <View key={ad.id} style={styles.adContainer}> 
+                <View key={index} style={styles.adContainer}> 
                     <View style={styles.detailContainer}>
                         <Text style={styles.adTitle}>{ad.title}</Text>
                         <Text style={styles.adAuthor}>{ad.author}</Text>

@@ -27,8 +27,10 @@ SECRET_KEY = 'django-insecure-ceiv*a1x-d88t(fyh2-3a&es!qa=%4!mdo#g49-9ve2d#ks(g^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
+
+CORS_ALLOW_ALL_ORIGINS = True 
 
 # Application definition
 
@@ -39,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -49,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'server.urls'
@@ -133,3 +137,5 @@ firebase_admin.initialize_app(
 )
 
 RUN_INDEXING_ON_STARTUP = True
+
+CORS_ALLOW_ALL_ORIGINS = True
