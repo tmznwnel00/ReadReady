@@ -1,15 +1,21 @@
+import os
 import json
 import time
 
 from firebase_admin import db
+from urllib.parse import unquote
 
 import bcrypt
+from dotenv import load_dotenv
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from elasticsearch import Elasticsearch
+from firebase_admin import db
 
 fixed_salt = b'$2b$12$7Cth.Iwf3o/8VW1x2Ly/le'
+load_dotenv()
 
 @csrf_exempt
 def signup(request):
@@ -81,3 +87,24 @@ def rating_book(request):
         '''
         pass
     return JsonResponse({'error': 'Invalid request or missing data'}, status=400)
+
+def book_search(request):
+    query = request.GET.get('q')
+    query = unquote(query)
+    if query:
+        certificate_path = os.getcwd() + '/http_ca.crt'
+        es_username = 'elastic'
+        es_password = os.getenv("ELASTIC_PASSWORD")
+
+        es = Elasticsearch(['https://localhost:9200'], basic_auth = (es_username, es_password), verify_certs=True, ca_certs=certificate_path)  
+        search_results = es.search(index='books_index', body={'query': {'multi_match': {'query': query, 'fields': ['title', 'author', 'description']}}})
+        hits = search_results['hits']['hits']
+        books = [{
+            "id": hit['_id'],
+            "title": hit['_source']['title'],
+            "author": hit['_source']['author'],
+            "description": hit['_source']['description']
+        } for hit in hits]
+    else:
+        books = []
+    return JsonResponse({'books': books})
