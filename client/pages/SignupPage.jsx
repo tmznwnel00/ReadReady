@@ -8,7 +8,7 @@ export default function SignupPage({ navigation }) {
 
     const handleRegister = async () => {
         try {
-            const response = await fetch('http://192.168.56.1:8000/signup/', {
+            const response = await fetch('http://124.197.140.56:8000/signup/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
