@@ -148,4 +148,3 @@ CORS_ALLOWED_ORIGINS = [
     "https://example.com",
     "http://localhost:8081" 
 ]
-
