@@ -18,7 +18,7 @@ export default function SignupPage({ navigation }) {
             const data = await response.json();
             if (response.status === 200) {
                 Alert.alert('Registration Successful', 'You can now login.');
-                navigation.navigate('LoginPage');
+                navigation.navigate('Login');
             } else {
                 Alert.alert('Registration Failed', data.error || 'Please try again.');
             }
