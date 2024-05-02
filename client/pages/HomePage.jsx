@@ -1,9 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Image, ScrollView, SafeAreaView } from 'react-native';
 import Navbar from '../assets/components/Navbar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function HomePage({ navigation }) {
-    // Dummy data for the recommendations section
+export default function HomePage({ route, navigation }) {
+    const [username, setUsername] = useState('');
+    useEffect(() => {
+        const loadUsername = async () => {
+            const storedUsername = await AsyncStorage.getItem('username');
+            if (storedUsername) setUsername(storedUsername);
+        };
+
+        loadUsername();
+    }, []);
     const recommendations = [
         { title: "Book Title 1", author: "Author 1", rating: "★★★★☆" },
         { title: "Book Title 2", author: "Author 2", rating: "★★★★★" },
@@ -31,7 +40,7 @@ export default function HomePage({ navigation }) {
                     ))}
                 </ScrollView>
                 <View style={styles.bookShelfContainer}>
-                <Text style={styles.bookshelf}>Jiyun's Bookshelf</Text>
+                <Text style={styles.bookshelf}>{username}'s Bookshelf</Text>
                 </View>
             </View>
 

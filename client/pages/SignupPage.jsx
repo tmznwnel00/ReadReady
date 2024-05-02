@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, Image } fro
 
 export default function SignupPage({ navigation }) {
     const [email, setEmail] = useState('');
-    const [id, setUsername] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
     const handleRegister = async () => {
