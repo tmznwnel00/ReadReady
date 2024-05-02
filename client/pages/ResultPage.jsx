@@ -25,7 +25,7 @@ export default function ResultPage({ route, navigation }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://192.168.x.x:8000/search/?q=${encodeURIComponent(searchQuery)}`);
+                const response = await fetch(`http://127.0.0.1:8000/search/?q=${encodeURIComponent(searchQuery)}`);
                 const data = await response.json();
                 setResults(data.results);
             } catch (error) {
