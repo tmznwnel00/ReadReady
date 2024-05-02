@@ -2,22 +2,24 @@ import React, {useState} from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 
 export default function LoginPage({ navigation }) {
-    const [id, setId] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
     const handleLogin = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/login/', {
+
+            const response = await fetch('http://127.0.0.1:8000/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username: id, password })
+
+                body: JSON.stringify({ username, password })
             });
             const data = await response.json();
             if (response.status === 200) {
-                Alert.alert('Login Successful', `Welcome ${id}!`);
-                navigation.navigate('Home');  // Ensure you have a 'Main' route configured in your navigation
+                Alert.alert('Login Successful', `Welcome ${username}!`);
+                navigation.navigate('Main');
             } else {
                 Alert.alert('Login Failed', data.error || 'Something went wrong');
             }
@@ -35,8 +37,8 @@ export default function LoginPage({ navigation }) {
             <TextInput
                 style={styles.input}
                 placeholder="ID"
-                value={id}
-                onChangeText={setId}
+                value={username}
+                onChangeText={setUsername}
             />
             <TextInput
                 style={styles.input}

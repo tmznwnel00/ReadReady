@@ -8,3 +8,4 @@ python-dotenv==1.0.1
 elasticsearch==8.13.0
 elasticsearch-dsl==8.13.0
 tensorflow==2.16.1
+django-cors-headers==4.3.1
