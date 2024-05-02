@@ -42,16 +42,17 @@ def signup(request):
         
 @csrf_exempt
 def login_user(request):
+    # should complement
     if request.method == 'POST':
         data = json.loads(request.body)
         username = data.get('username')
         password = data.get('password')
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), fixed_salt).decode('utf-8')   
-        print(username,hashed_password)     
-        user = authenticate(request, username=username, password=hashed_password)
-        
-        if user is not None:
-            login(request, user)
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), fixed_salt).decode('utf-8')        
+        # user = authenticate(request, username=username, password=hashed_password)
+        ref = db.reference('/users')
+        user = ref.child(username).get()
+        if user is not None and user.get('password') == hashed_password:
+            # login(request, user)
             return JsonResponse({'message': 'User logged in'})
     return JsonResponse({'error': "Wrong username or password"}, status=401)
 
