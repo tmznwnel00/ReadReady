@@ -7,11 +7,13 @@ export default function LoginPage({ navigation }) {
 
     const handleLogin = async () => {
         try {
+
             const response = await fetch('http://127.0.0.1:8000/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
+
                 body: JSON.stringify({ username, password })
             });
             const data = await response.json();
@@ -19,12 +21,13 @@ export default function LoginPage({ navigation }) {
                 Alert.alert('Login Successful', `Welcome ${username}!`);
                 navigation.navigate('Main');
             } else {
-                Alert.alert('Login Failed', data.message);
+                Alert.alert('Login Failed', data.error || 'Something went wrong');
             }
         } catch (error) {
             Alert.alert('Network Error', 'Unable to connect to the server. Please try again later.');
         }
     };
+    
 
        return (
         <View style={styles.loginContainer}>
