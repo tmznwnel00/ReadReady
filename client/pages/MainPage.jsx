@@ -25,7 +25,7 @@ export default function MainPage({ navigation }) {
             <View style={styles.purpleBox}>
                 <Text style={styles.purpleBoxText}>I know what you will read{'\n'}for a lifetime...</Text>
             </View>
-            <Button title="Home" onPress={() => navigation.navigate('Home')}/>
+            {/*<Button title="Home" onPress={() => navigation.navigate('Home')}/>*/}
         </View>
     );
 }
