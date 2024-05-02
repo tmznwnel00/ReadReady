@@ -3,22 +3,22 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, Image } fro
 
 export default function SignupPage({ navigation }) {
     const [email, setEmail] = useState('');
-    const [id, setId] = useState('');
+    const [id, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
     const handleRegister = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/signup/', {
+            const response = await fetch('http://127.0.0.1:8000/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username: id, email, password })
+                body: JSON.stringify({ username, email, password })
             });
             const data = await response.json();
             if (response.status === 200) {
                 Alert.alert('Registration Successful', 'You can now login.');
-                navigation.navigate('LoginPage');  // Navigate to Login Page upon successful registration
+                navigation.navigate('LoginPage');
             } else {
                 Alert.alert('Registration Failed', data.error || 'Please try again.');
             }
@@ -44,8 +44,8 @@ export default function SignupPage({ navigation }) {
                 <Text style={styles.inputTextID}>ID</Text>
                 <TextInput
                     style={styles.input}
-                    value={id}
-                    onChangeText={setId}
+                    value={username}
+                    onChangeText={setUsername}
                 />
                 </View>
                 <View style={styles.inputContainer}>
