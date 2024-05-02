@@ -69,6 +69,7 @@ export default function ResultPage({ route, navigation }) {
                         "description": "베아트릭스 포터 베스트 콜렉션 시리즈 1권. 1902년 영국의 초판 인쇄본을 그대로 재현한 '베아트릭스 포터 콜렉션' 오리지널 에디션이다. 한적한 시골 농장을 무대로 펼쳐지는 토끼 피터래빗의 신나는 모험담이 펼쳐진다."
                     
                     }
+                    
                 ]
                 };
                 setResults(simulatedResponse.books);
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     bookList:{
-        height: '50%',
+        height: 600,
         alignItems:'center',
     },
     title: {
