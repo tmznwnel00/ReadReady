@@ -1,9 +1,11 @@
 import React, {useState} from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginPage({ navigation }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    AsyncStorage.setItem('username', username);
 
     const handleLogin = async () => {
         try {
@@ -17,6 +19,7 @@ export default function LoginPage({ navigation }) {
             const data = await response.json();
             if (response.status === 200) {
                 Alert.alert('Login Successful', `Welcome ${username}!`);
+                setUsername(username);
                 navigation.navigate('Home');
             } else {
                 Alert.alert('Login Failed', data.error || 'Something went wrong');
