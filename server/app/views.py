@@ -46,7 +46,8 @@ def login_user(request):
         data = json.loads(request.body)
         username = data.get('username')
         password = data.get('password')
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), fixed_salt).decode('utf-8')        
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), fixed_salt).decode('utf-8')   
+        print(username,hashed_password)     
         user = authenticate(request, username=username, password=hashed_password)
         
         if user is not None:
