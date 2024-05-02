@@ -4,8 +4,13 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Navbar from '../assets/components/Navbar';
 
 export default function ResultPage({ route, navigation }) {
-    const { searchQuery } = route.params;
+    const [searchQuery, setSearchQuery] = useState(route.params.searchQuery);
     const [results, setResults] = useState([]);
+
+    const handleSearch = () => {
+        navigation.navigate('Result', { searchQuery });
+    };
+
     /*
     useEffect(() => {
         
@@ -14,7 +19,7 @@ export default function ResultPage({ route, navigation }) {
                 const response = await fetch(`http://127.0.0.1:8000/search?q=${encodeURIComponent(searchQuery)}`);
                 const data = await response.json();
                 if (response.ok) {
-                    setResults(data.books);
+                    setResults(data.books.slice(0, 5));
                 } else {
                     console.error('Server error:', data.error);
                     setResults([]);
@@ -80,9 +85,10 @@ export default function ResultPage({ route, navigation }) {
                     <Icon name="magnify" style={styles.icon} />
                     <TextInput
                         style={styles.input}
-                        placeholder="도서명 또는 작가"
+                        placeholder={"도서명 또는 작가"}
                         value={searchQuery}
-                        onChangeText={() => {}}
+                        onChangeText={setSearchQuery}
+                        onSubmitEditing={handleSearch}
                     />
                 </View>
             <View style={styles.bookList}>
