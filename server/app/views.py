@@ -90,6 +90,14 @@ def rating_book(request):
         pass
     return JsonResponse({'error': 'Invalid request or missing data'}, status=400)
 
+def book_info(request):
+    query = request.GET.get('itemId')
+    ref = db.reference('/books')
+    book = ref.child(query).get()
+    if book:
+        return JsonResponse(book)
+    return JsonResponse({'error': 'Invalid book id'}, status=400)
+
 def book_search(request):
     query = request.GET.get('q')
     query = unquote(query)
