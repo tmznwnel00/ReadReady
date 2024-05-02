@@ -42,6 +42,7 @@ def signup(request):
         
 @csrf_exempt
 def login_user(request):
+    # should complement
     if request.method == 'POST':
         data = json.loads(request.body)
         username = data.get('username')
