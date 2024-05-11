@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, SafeAreaView, ScrollView, Platform } from 'react-native';
+import { StyleSheet, View, Text, TextInput, SafeAreaView, ScrollView, Platform, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Navbar from '../assets/components/Navbar';
 
@@ -95,11 +95,14 @@ export default function ResultPage({ route, navigation }) {
             <View style={styles.bookList}>
             <ScrollView style={styles.scrollView}>
             {results.map((book, index) => (
-                <View key={index} style={styles.bookContainer}> 
+                <TouchableOpacity 
+                    key={index} 
+                    style={styles.bookContainer}
+                    onPress={() => navigation.navigate('Detail', { book })}> 
                     <Text style={styles.bookTitle}>{book.title}</Text>
                     <Text style={styles.bookAuthor}>{book.author}</Text>
                     <Text style={styles.bookDescription}>{book.description}</Text>
-                </View>
+                </TouchableOpacity>
             ))}
             </ScrollView>
             </View>

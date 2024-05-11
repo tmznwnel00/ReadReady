@@ -7,17 +7,21 @@ export default function MainPage({ navigation }) {
             <Image source={require('../assets/Bookmark.png')} style={styles.bookmark} />
             <Text style={styles.title}>Read, Ready?</Text>
             <Image source={require('../assets/Logo.png')} style={styles.logo} />
-
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate('Login')} // Add navigation to the Login screen
+                onPress={() => navigation.navigate('Search')} // Add navigation to the Login screen
+            ></TouchableOpacity>
+            <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('Login')}
             >
+
                 <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate('Signup')} // Add navigation to the Signup screen
+                onPress={() => navigation.navigate('Signup')} 
             >
                 <Text style={styles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
