@@ -118,3 +118,82 @@ def book_search(request):
     else:
         books = []
     return JsonResponse({'books': books})
+
+@csrf_exempt
+def crud_posting(request):
+    query = request.GET.get('postingId')
+    if query:
+        ref = db.reference('/community')
+        if request.method == 'GET':    
+            post = ref.child(query).get()
+            if post:
+                return JsonResponse(post)
+        elif request.method == 'DELETE':
+            ref.child(query).delete()
+            return JsonResponse({'message': 'Posting is deleted'})
+        elif request.method == 'PUT':
+            post = ref.child(query).get()
+            
+            data = json.loads(request.body)
+            if data.get('title'):
+                title = data.get('title')
+            else:
+                title = post.get('title')
+            if data.get('content'):
+                content = data.get('content')
+            else:
+                content = post.get('content')
+            timestamp = time.time()
+            modifed_posting = ref.child(query).update({
+                'title': title,
+                'content': content,
+                'modified': True,
+                'createdAt': timestamp
+            })
+            return JsonResponse({'message': 'Post is modified'})
+        elif request.method == 'POST':
+            post = ref.child(query).get()
+            
+            data = json.loads(request.body)
+            type = data.get('type')
+            if type == 'like':
+                ref.child(query).update({
+                    'like': post.get('like') + 1
+                })
+                return JsonResponse(ref.child(query).get())
+            elif type == 'comment':
+                ref2 = db.reference('/comments')
+                username = data.get('username')
+                content = data.get('content')
+                timestamp = time.time()
+                comment = ref2.push({
+                    'parentPost': query,
+                    'username': username,
+                    'content': content,
+                    'createdAt': timestamp
+                })
+                ref.child(query).update({
+                    'comment': post.get('comment') + 1
+                })
+                return JsonResponse({'message': 'Comment is created'})
+    if request.method == 'POST':    
+        data = json.loads(request.body)
+        username = data.get('username')
+        title = data.get('title')
+        content = data.get('content')
+        timestamp = time.time()
+                    
+        ref = db.reference('/community')
+        new_posting = ref.push({
+            'username': username,
+            'title': title,
+            'content': content,
+            'like': 0,
+            'comment': 0,
+            'modified': False,
+            'createdAt': timestamp
+        })
+        return JsonResponse({'message': 'New posting created'})
+    
+
+    return JsonResponse({'error': 'Invalid request or missing data'}, status=400)
