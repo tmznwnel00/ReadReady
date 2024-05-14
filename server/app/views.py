@@ -68,8 +68,10 @@ def rating_book(request):
         username = data.get('username')
         itemId = data.get('itemId')
         rating = data.get('rating')
+        date = data.get('date')
         description = data.get('description')
-        timestamp = time.time()
+        if not date:
+            date = time.time()
         
         # have to check username is exist and itemId exist
         
@@ -78,8 +80,8 @@ def rating_book(request):
             'username': username,
             'itemId': itemId,
             'rating': rating,
-            'description': description,
-            'createdAt': timestamp
+            'date': date,
+            'description': description
         })
         new_row_key = new_row.key
         return JsonResponse({'message': 'Rating created', 'objectId': new_row_key})
