@@ -5,14 +5,6 @@ import numpy as np
 import firebase_admin
 from firebase_admin import credentials, db
 
-cred = credentials.Certificate(os.getcwd() + "/server/server/readready-14b96-firebase-adminsdk-xmh3d-5b309e7202.json")
-firebase_admin.initialize_app(
-    cred,
-    {
-        "databaseURL": "https://readready-14b96-default-rtdb.asia-southeast1.firebasedatabase.app/"
-    }
-)
-
 ratings = db.reference('/ratings')
 rating_list = []
 user_list = []
@@ -48,7 +40,9 @@ book_set = sorted(set(book_list))
 user_one_hot = np.zeros((len(user_list), len(user_set)))
 book_one_hot = np.zeros((len(book_list), len(book_set)))
 date_vector = np.array(date_list)
+date_vector = date_vector[:, np.newaxis]
 rating_vector = np.array(score_list)
+vectorY = rating_vector[:, np.newaxis]
 
 sorted_rating_data = sorted(rating_list, key=lambda x: (x['username'], x['date']))
 grouped_rating_data = {}
@@ -83,11 +77,4 @@ for user in user_list:
 last_rated = np.array(last_rated_matrix)
 other_rated = np.array(other_rated_matrix)
 
-print(np.shape(user_one_hot))
-print(np.shape(book_one_hot))
-print(np.shape(other_rated))
-print(np.shape(date_vector))
-print(np.shape(last_rated))
-print(np.shape(rating_vector))
-
-
+vectorX = np.concatenate((user_one_hot, book_one_hot, other_rated, date_vector, last_rated), axis=1)

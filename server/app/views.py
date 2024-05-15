@@ -2,9 +2,6 @@ import os
 import json
 import time
 
-from firebase_admin import db
-from urllib.parse import unquote
-
 import bcrypt
 from dotenv import load_dotenv
 from django.contrib.auth import authenticate, login, logout
@@ -13,6 +10,10 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from elasticsearch import Elasticsearch
 from firebase_admin import db
+from firebase_admin import db
+from urllib.parse import unquote
+
+from .FM import recommendation
 
 fixed_salt = b'$2b$12$7Cth.Iwf3o/8VW1x2Ly/le'
 load_dotenv()
@@ -199,3 +200,11 @@ def crud_posting(request):
     
 
     return JsonResponse({'error': 'Invalid request or missing data'}, status=400)
+
+def book_recommendation(request):
+    query = request.GET.get('username')
+    ref = db.reference('/books')
+    data = []
+    for book in recommendation(query):
+        data.append(ref.child(str(book)).get())
+    return JsonResponse({'message': data})
