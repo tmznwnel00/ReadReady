@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import ResultPage from './pages/ResultPage';
 import DetailPage from './pages/DetailPage';
+import ProgressPage from './pages/ProgressPage';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -34,6 +35,7 @@ export default function App() {
         <Stack.Screen name="Search" component={SearchPage} options={{ headerShown: false }} />
         <Stack.Screen name="Result" component={ResultPage} options={{ headerShown: false }}/>
         <Stack.Screen name="Detail" component={DetailPage} options={{ headerShown: false }}/>
+        <Stack.Screen name="Progress" component={ProgressPage} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   )
