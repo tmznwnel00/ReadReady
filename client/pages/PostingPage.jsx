@@ -6,7 +6,6 @@ const PostingPage = ({ navigation }) => {
     const [content, setContent] = useState('');
     const [username, setUsername] = useState('');
     useEffect(() => {
-        // Load the username from AsyncStorage
         const loadUsername = async () => {
         const storedUsername = await AsyncStorage.getItem('username');
         setUsername(storedUsername);
