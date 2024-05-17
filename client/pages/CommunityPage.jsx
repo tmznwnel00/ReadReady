@@ -1,14 +1,28 @@
-import React from 'react';
-import { StyleSheet, View, Text, ScrollView, SafeAreaView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Example using MaterialCommunityIcons
 import Navbar from '../assets/components/Navbar';
 
 export default function CommunityPage({ navigation }) {
-    const posts = [
-        { user: "s.r.eun", content: "주식 투자 책 추천해주세요.\n최대한 단기간 내 고수익을 냈으면 합니다!\n..." },
-        { user: "j2_y00n", content: "최근 심금을 울린 소설을 읽었습니다.\n바로 그 소설은 \n..." },
-        { user: "이영지", content: "목 건강을 위해서 가져야할 습관 5가지!\n1. 겨울철 목도리 꼭 하고 다니기\n2. ..." },
-    ];
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch('http://127.0.0.1:8000/posting')
+            .then(response => response.json())
+            .then(data => {
+                setPosts(data);
+                setLoading(false);
+            })
+            .catch(error => {
+                console.error('Error fetching posts:', error);
+                setLoading(false);
+            });
+    }, []);
+
+    if (loading) {
+        return <ActivityIndicator size="large" color="#0000ff" />;
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -24,6 +38,10 @@ export default function CommunityPage({ navigation }) {
                     </View>
                 ))}
             </ScrollView>
+            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('PostingPage')}
+      >
+                <Text style={styles.addButtonText}>Add Post</Text>
+            </TouchableOpacity>
             <Navbar navigation={navigation} />
         </SafeAreaView>
     );
@@ -76,4 +94,16 @@ const styles = StyleSheet.create({
         fontSize: 14,
         lineHeight: 30,
     },
+    addButton: {
+        backgroundColor: '#007bff',
+        marginHorizontal: '10%',
+        padding: 15,
+        borderRadius: 10,
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    addButtonText: {
+        fontSize: 20,
+        color: '#fff',
+    }
 });

@@ -150,6 +150,8 @@ def crud_posting(request):
             modifed_posting = ref.child(query).update({
                 'title': title,
                 'content': content,
+                'like': post.get('like', 0),
+                'comment': post.get('comment', 0),
                 'modified': True,
                 'createdAt': timestamp
             })

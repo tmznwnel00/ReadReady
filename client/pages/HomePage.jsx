@@ -31,7 +31,6 @@ export default function HomePage({ route, navigation }) {
                 <ScrollView vertical={true} style={styles.recommendationsScrollView}>
                     {recommendations.map((book, index) => (
                         <View key={index} style={styles.bookCard}>
-                            {/* <Image source={require('../assets/book_cover_placeholder.png')} style={styles.bookCover} /> */}
                             
                             <Text style={styles.bookTitle}>{book.title}</Text>
                             <Text style={styles.bookAuthor}>{book.author}</Text>

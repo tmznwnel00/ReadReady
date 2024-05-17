@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import ResultPage from './pages/ResultPage';
 import DetailPage from './pages/DetailPage';
+import PostingPage from './PostingPage';
 import ProgressPage from './pages/ProgressPage';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
@@ -36,6 +37,7 @@ export default function App() {
         <Stack.Screen name="Result" component={ResultPage} options={{ headerShown: false }}/>
         <Stack.Screen name="Detail" component={DetailPage} options={{ headerShown: false }}/>
         <Stack.Screen name="Progress" component={ProgressPage} options={{ headerShown: false }}/>
+        <Stack.Screen name="PostingPage" component={PostingPage} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   )

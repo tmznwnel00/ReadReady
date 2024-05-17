@@ -18,8 +18,8 @@ export default function LoginPage({ navigation }) {
             });
             const data = await response.json();
             if (response.status === 200) {
+                await AsyncStorage.setItem('username', username);
                 Alert.alert('Login Successful', `Welcome ${username}!`);
-                setUsername(username);
                 navigation.navigate('Home');
             } else {
                 Alert.alert('Login Failed', data.error || 'Something went wrong');
