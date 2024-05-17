@@ -38,7 +38,7 @@ export default function CommunityPage({ navigation }) {
                     </View>
                 ))}
             </ScrollView>
-            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('PostingPage')}
+            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('Posting')}
       >
                 <Text style={styles.addButtonText}>Add Post</Text>
             </TouchableOpacity>
