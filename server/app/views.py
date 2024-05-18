@@ -125,8 +125,8 @@ def book_search(request):
 @csrf_exempt
 def crud_posting(request):
     query = request.GET.get('postingId')
+    ref = db.reference('/community')
     if query:
-        ref = db.reference('/community')
         if request.method == 'GET':    
             post = ref.child(query).get()
             if post:
@@ -188,7 +188,6 @@ def crud_posting(request):
         content = data.get('content')
         timestamp = time.time()
                     
-        ref = db.reference('/community')
         new_posting = ref.push({
             'username': username,
             'title': title,
@@ -199,6 +198,9 @@ def crud_posting(request):
             'createdAt': timestamp
         })
         return JsonResponse({'message': 'New posting created'})
+    elif request.method == 'GET':
+        query = ref.order_by_child('createdAt').limit_to_last(10)
+        return JsonResponse(query.get())
     
 
     return JsonResponse({'error': 'Invalid request or missing data'}, status=400)
