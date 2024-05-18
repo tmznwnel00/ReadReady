@@ -15,8 +15,6 @@ import firebase_admin
 from pathlib import Path
 from firebase_admin import credentials
 
-import corsheaders
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,7 +29,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 CORS_ALLOW_ALL_ORIGINS = True 
 
 # Application definition
@@ -43,13 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders'
-    'books'
-
+    'corsheaders',
+    'app',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware', 
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -58,7 +54,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'server.urls'
@@ -141,8 +136,6 @@ firebase_admin.initialize_app(
         "databaseURL": "https://readready-14b96-default-rtdb.asia-southeast1.firebasedatabase.app/"
     }
 )
-
-RUN_INDEXING_ON_STARTUP = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8081" 
