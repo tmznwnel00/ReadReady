@@ -210,3 +210,34 @@ def book_recommendation(request):
     for book in recommendation(query):
         data.append(ref.child(str(book)).get())
     return JsonResponse({'message': data})
+
+def get_books(request):
+    books_ref = db.collection('books')
+    books = [doc.to_dict() for doc in books_ref.stream()]
+    return JsonResponse(books, safe=False)
+
+def select_books(request):
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        book_ids = request.POST.getlist('book_ids')
+        user = User.objects.get(pk=user_id)
+
+        for book_id in book_ids:
+            book_ref = db.collection('books').document(book_id)
+            book = book_ref.get().to_dict()
+            BookSelection.objects.create(user=user, book_id=book_id, book_title=book['title'])
+
+        return JsonResponse({'status': 'success'})
+
+def record_pages(request):
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        book_id = request.POST.get('book_id')
+        pages_read = int(request.POST.get('pages_read'))
+
+        user = User.objects.get(pk=user_id)
+        book_selection = BookSelection.objects.get(user=user, book_id=book_id)
+        book_selection.pages_read += pages_read
+        book_selection.save()
+
+        return JsonResponse({'status': 'success'})
