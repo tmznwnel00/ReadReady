@@ -16,10 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from app.views import book_recommendation, book_info, book_search, crud_posting, \
-    signup, login_user, logout_user, rating_book, get_books, select_books, record_pages
+from app.views import (
+    signup, login_user, logout_user, rating_book, book_info, book_search, 
+    crud_posting, book_recommendation, get_books, select_books, record_pages
+)
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('signup', signup, name='signup'),
     path('login', login_user, name='login'),
     path('logout', logout_user, name='logout'),
@@ -32,3 +35,4 @@ urlpatterns = [
     path('select_books', select_books, name='select_books'),
     path('record_pages', record_pages, name='record_pages')
 ]
+
