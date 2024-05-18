@@ -1,7 +1,6 @@
 import os
 import json
 import time
-
 import bcrypt
 from dotenv import load_dotenv
 from django.contrib.auth import authenticate, login, logout
@@ -10,10 +9,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from elasticsearch import Elasticsearch
 from firebase_admin import db
-from firebase_admin import db
 from urllib.parse import unquote
-
 from .FM import recommendation
+from .models import BookSelection
 
 fixed_salt = b'$2b$12$7Cth.Iwf3o/8VW1x2Ly/le'
 load_dotenv()
@@ -43,17 +41,14 @@ def signup(request):
         
 @csrf_exempt
 def login_user(request):
-    # should complement
     if request.method == 'POST':
         data = json.loads(request.body)
         username = data.get('username')
         password = data.get('password')
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), fixed_salt).decode('utf-8')        
-        # user = authenticate(request, username=username, password=hashed_password)
         ref = db.reference('/users')
         user = ref.child(username).get()
         if user is not None and user.get('password') == hashed_password:
-            # login(request, user)
             return JsonResponse({'message': 'User logged in'})
     return JsonResponse({'error': "Wrong username or password"}, status=401)
 
@@ -74,8 +69,6 @@ def rating_book(request):
         if not date:
             date = time.time()
         
-        # have to check username is exist and itemId exist
-        
         ref = db.reference('/ratings')
         new_row = ref.push({
             'username': username,
@@ -87,9 +80,6 @@ def rating_book(request):
         new_row_key = new_row.key
         return JsonResponse({'message': 'Rating created', 'objectId': new_row_key})
     elif request.method == 'GET':
-        '''
-        TBD
-        '''
         pass
     return JsonResponse({'error': 'Invalid request or missing data'}, status=400)
 
@@ -138,16 +128,10 @@ def crud_posting(request):
             post = ref.child(query).get()
             
             data = json.loads(request.body)
-            if data.get('title'):
-                title = data.get('title')
-            else:
-                title = post.get('title')
-            if data.get('content'):
-                content = data.get('content')
-            else:
-                content = post.get('content')
+            title = data.get('title', post.get('title'))
+            content = data.get('content', post.get('content'))
             timestamp = time.time()
-            modifed_posting = ref.child(query).update({
+            ref.child(query).update({
                 'title': title,
                 'content': content,
                 'like': post.get('like', 0),
@@ -206,16 +190,17 @@ def crud_posting(request):
 def book_recommendation(request):
     query = request.GET.get('username')
     ref = db.reference('/books')
-    data = []
-    for book in recommendation(query):
-        data.append(ref.child(str(book)).get())
+    data = [ref.child(str(book)).get() for book in recommendation(query)]
     return JsonResponse({'message': data})
 
+@csrf_exempt
 def get_books(request):
-    books_ref = db.collection('books')
-    books = [doc.to_dict() for doc in books_ref.stream()]
-    return JsonResponse(books, safe=False)
+    if request.method == 'GET':
+        books_ref = db.collection('books')
+        books = [doc.to_dict() for doc in books_ref.stream()]
+        return JsonResponse(books, safe=False)
 
+@csrf_exempt
 def select_books(request):
     if request.method == 'POST':
         user_id = request.POST.get('user_id')
@@ -229,6 +214,7 @@ def select_books(request):
 
         return JsonResponse({'status': 'success'})
 
+@csrf_exempt
 def record_pages(request):
     if request.method == 'POST':
         user_id = request.POST.get('user_id')
