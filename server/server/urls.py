@@ -27,5 +27,8 @@ urlpatterns = [
     path('search', book_search, name='book_search'),
     path('book', book_info, name='book_info'),
     path('posting', crud_posting, name='crud_post'),
-    path('recommendation', book_recommendation, name='recommendation')
+    path('recommendation', book_recommendation, name='recommendation'),
+    path('get_books/', views.get_books, name='get_books'),
+    path('select_books/', views.select_books, name='select_books'),
+    path('record_pages/', views.record_pages, name='record_pages')
 ]
