@@ -1,107 +1,99 @@
 import React, { useState } from 'react';
 import {  StyleSheet,  View,  TextInput,  Button,  Text,  SafeAreaView,  ScrollView,  TouchableOpacity } from 'react-native';
+import Navbar from '../assets/components/Navbar';
 
-const PostingPage = ({ navigation }) => {
+export default function PostingPage({ route, navigation }) {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    const [username, setUsername] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
+  
     useEffect(() => {
-        const loadUsername = async () => {
-        const storedUsername = await AsyncStorage.getItem('username');
-        setUsername(storedUsername);
-    };
 
-    loadUsername();
-    }, []);
-
+      if (route.params && route.params.post) {
+        const { post } = route.params;
+        setTitle(post.title);
+        setContent(post.content);
+        setIsEditing(true);
+      }
+    }, [route.params]);
+  
     const handleSubmit = () => {
-        const postData = {
-        title,
-        content,
-        username,
-        like: 0,
-        comment: 0,
-        createdAt: new Date().toISOString()
-    };
-
-        // Replace 'http://<your-server-ip>:8000/posting/' with your server URL
-        fetch('http://127.0.0.1:8000/posting', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(postData)
+      if (isEditing) {
+        fetch(`http://127.0.0.1:8000/posting/${route.params.post.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content })
         })
         .then(response => response.json())
-        .then(data => {
-        console.log('Success:', data);
-        navigation.goBack(); // Navigate back to the community page
+        .then(() => {
+          navigation.goBack();
         })
-        .catch((error) => {
-        console.error('Error:', error);
-        });
+        .catch(error => console.error('Error updating post:', error));
+      } else {
+        fetch('http://127.0.0.1:8000/posting', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content })
+        })
+        .then(response => response.json())
+        .then(() => {
+          navigation.navigate('CommunityPage');
+        })
+        .catch(error => console.error('Error adding post:', error));
+      }
     };
-
+  
     return (
-        <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.contentContainer}>
-            <Text style={styles.label}>Title</Text>
-            <TextInput
+      <SafeAreaView style={styles.container}>
+        <ScrollView style={styles.form}>
+          <Text style={styles.label}>Title</Text>
+          <TextInput
             style={styles.input}
             value={title}
             onChangeText={setTitle}
-            placeholder="Enter the title of your post"
-            />
-            <Text style={styles.label}>Content</Text>
-            <TextInput
-            style={[styles.input, styles.textArea]}
+            placeholder="Enter post title"
+          />
+          <Text style={styles.label}>Content</Text>
+          <TextInput
+            style={styles.textarea}
+            multiline
             value={content}
             onChangeText={setContent}
-            placeholder="Enter the content of your post"
-            multiline={true}
-            numberOfLines={4}
-            />
-            <TouchableOpacity onPress={handleSubmit} style={styles.button}>
-            <Text style={styles.buttonText}>Post</Text>
-            </TouchableOpacity>
+            placeholder="Enter post content"
+          />
+          <Button title={isEditing ? 'Update Post' : 'Add Post'} onPress={handleSubmit} />
         </ScrollView>
-        </SafeAreaView>
+        <Navbar navigation={navigation} />
+      </SafeAreaView>
     );
-    };
-
-    const styles = StyleSheet.create({
+  };
+  
+  const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: '#FEF9F2',
+      flex: 1,
+      backgroundColor: '#FEF9F2'
     },
-    contentContainer: {
-        padding: 20,
+    form: {
+      padding: 20
     },
     label: {
-        fontSize: 16,
-        marginBottom: 5,
+      fontSize: 18,
+      marginBottom: 5
     },
     input: {
-        fontSize: 18,
-        marginBottom: 15,
-        paddingHorizontal: 10,
-        paddingVertical: 8,
-        borderRadius: 5,
-        backgroundColor: '#f0f0f0',
+      fontSize: 16,
+      borderColor: '#ddd',
+      borderWidth: 1,
+      padding: 10,
+      marginBottom: 10
     },
-    textArea: {
-        height: 120,
-    },
-    button: {
-        backgroundColor: '#007bff',
-        padding: 10,
-        borderRadius: 5,
-        alignItems: 'center',
-    },
-    buttonText: {
-        fontSize: 20,
-        color: '#fff',
+    textarea: {
+      fontSize: 16,
+      borderColor: '#ddd',
+      borderWidth: 1,
+      padding: 10,
+      height: 100,
+      textAlignVertical: 'top',
+      marginBottom: 10
     }
-    });
-
-    export default PostingPage;
+  });

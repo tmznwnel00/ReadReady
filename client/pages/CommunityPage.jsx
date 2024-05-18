@@ -1,41 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Example using MaterialCommunityIcons
 import Navbar from '../assets/components/Navbar';
 
 export default function CommunityPage({ navigation }) {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
-
+    const [error, setError] = useState(null);
+    
     useEffect(() => {
         fetch('http://127.0.0.1:8000/posting')
-            .then(response => response.json())
-            .then(data => {
-                setPosts(data);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error('Error fetching posts:', error);
-                setLoading(false);
-            });
-    }, []);
-
-    if (loading) {
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch posts');
+            }
+            return response.json();
+          })
+          .then(data => {
+            setPosts(data || []); // Fallback to an empty array if data is null
+            setLoading(false);
+          })
+          .catch(error => {
+            console.error('Error fetching posts:', error);
+            setError(error.toString());
+            setLoading(false);
+          });
+      }, []);
+    
+      if (loading) {
         return <ActivityIndicator size="large" color="#0000ff" />;
-    }
+      }
+    
+      if (error) {
+        return (
+          <SafeAreaView style={styles.container}>
+            <Text style={styles.errorText}>Failed to load posts: {error}</Text>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Posting')}>
+              <Text style={styles.buttonText}>Try Again</Text>
+            </TouchableOpacity>
+          </SafeAreaView>
+        );
+      }
 
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>COMMUNITY</Text>
             <ScrollView vertical={true} style={styles.postsList}>
                 {posts.map((post, index) => (
-                    <View key={index} style={styles.postCard}>
-                        <View style={styles.nameContainer}>
-                            <Icon name="account-circle" style={styles.profileIcon}/>
-                            <Text style={styles.postUser}>{post.user} 님</Text>
-                        </View>
-                        <Text style={styles.postContent}>{post.content}</Text>
+                    <TouchableOpacity key={index} onPress={() => navigation.navigate('PostingDetailPage', { post })}>
+                    <View style={styles.postCard}>
+                      <View style={styles.nameContainer}>
+                        <Icon name="account-circle" style={styles.profileIcon} />
+                        <Text style={styles.postUser}>{post.username} 님</Text>
+                      </View>
+                      <Text style={styles.postContent}>{post.content}</Text>
                     </View>
+                  </TouchableOpacity>
                 ))}
             </ScrollView>
             <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('Posting')}
@@ -62,14 +82,14 @@ const styles = StyleSheet.create({
         alignSelf: 'center', 
     },
     postsList: {
-        width: '100%', // Ensures the list takes up full width
+        width: '100%', 
     },
     postCard: {
         backgroundColor: '#FFFFFF',
         padding: 20,
         borderRadius: 10,
         marginVertical: 15,
-        marginHorizontal: '10%', // Maintains horizontal spacing
+        marginHorizontal: '10%',
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
