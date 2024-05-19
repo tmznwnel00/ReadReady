@@ -17,7 +17,7 @@ export default function CommunityPage({ navigation }) {
             return response.json();
           })
           .then(data => {
-            setPosts(data || []); // Fallback to an empty array if data is null
+            setPosts([...data].reverse());
             setLoading(false);
           })
           .catch(error => {
