@@ -107,9 +107,10 @@ const renderStarRating = (rating) => {
           <Text style={styles.bookAuthor}>{book.author}</Text>
           <Text style={styles.bookDescription}>{book.description}</Text>
         </View>
-        <TouchableOpacity style={styles.progress} onPress={() => navigation.navigate('Progress')}>
+        <TouchableOpacity style={styles.progress} onPress={() => navigation.navigate('Progress', { book })}>
           <Text style={styles.progressText}>Progress</Text>
         </TouchableOpacity>
+
         <View style={styles.reviewContainer}>
           <Text style={styles.textReview}>Review</Text>
           <TextInput

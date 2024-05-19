@@ -17,7 +17,15 @@ export default function CommunityPage({ navigation }) {
             return response.json();
           })
           .then(data => {
-            setPosts([...data].reverse());
+            if (typeof data === 'object' && !Array.isArray(data)) {
+              const postsArray = Object.keys(data).map(key => ({
+                id: key,
+                ...data[key]
+              }));
+              setPosts(postsArray.reverse());
+            } else {
+              throw new Error('Data format is incorrect, expected an object of objects');
+            }
             setLoading(false);
           })
           .catch(error => {
@@ -25,6 +33,7 @@ export default function CommunityPage({ navigation }) {
             setError(error.toString());
             setLoading(false);
           });
+          
       }, []);
     
       if (loading) {
@@ -45,18 +54,18 @@ export default function CommunityPage({ navigation }) {
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>COMMUNITY</Text>
-            <ScrollView vertical={true} style={styles.postsList}>
-                {posts.map((post, index) => (
-                    <TouchableOpacity key={index} onPress={() => navigation.navigate('PostingDetailPage', { post })}>
-                    <View style={styles.postCard}>
-                      <View style={styles.nameContainer}>
-                        <Icon name="account-circle" style={styles.profileIcon} />
-                        <Text style={styles.postUser}>{post.username} 님</Text>
-                      </View>
-                      <Text style={styles.postContent}>{post.content}</Text>
+            <ScrollView vertical={true} contentContainerStyle={styles.postsList}>
+              {posts.map((post, index) => (
+                <TouchableOpacity key={index} onPress={() => navigation.navigate('PostDetail', { post })}>
+                  <View style={styles.postCard}>
+                    <View style={styles.nameContainer}>
+                      <Icon name="account-circle" style={styles.profileIcon} />
+                      <Text style={styles.postUser}>{post.username} 님</Text>
                     </View>
-                  </TouchableOpacity>
-                ))}
+                    <Text style={styles.postContent}>{post.content}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
             </ScrollView>
             <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('Posting')}
       >
@@ -82,8 +91,11 @@ const styles = StyleSheet.create({
         alignSelf: 'center', 
     },
     postsList: {
-        width: '100%', 
+      width: '100%',
+      flexGrow: 1,
+      justifyContent: 'flex-start'  
     },
+    
     postCard: {
         backgroundColor: '#FFFFFF',
         padding: 20,

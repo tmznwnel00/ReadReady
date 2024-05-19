@@ -1,5 +1,4 @@
-// PostingDetailPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, TextInput, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Navbar from '../assets/components/Navbar';
@@ -14,7 +13,6 @@ export default function PostingDetailPage ({ route, navigation }) {
     const [currentUser, setCurrentUser] = useState(null);
   
     useEffect(() => {
-      // Load the current user from storage
       const loadUser = async () => {
         const user = await AsyncStorage.getItem('username');
         setCurrentUser(user);
@@ -26,7 +24,6 @@ export default function PostingDetailPage ({ route, navigation }) {
     const handleLike = () => {
       const updatedLikes = likes + 1;
       setLikes(updatedLikes);
-      // Update likes in the backend
       fetch(`http://127.0.0.1:8000/posting/${post.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -39,7 +36,6 @@ export default function PostingDetailPage ({ route, navigation }) {
       const updatedComments = [...comments, commentData];
       setComments(updatedComments);
       setNewComment('');
-      // Update comments in the backend
       fetch(`http://127.0.0.1:8000/posting/${post.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

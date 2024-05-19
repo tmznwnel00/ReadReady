@@ -122,6 +122,7 @@ def book_search(request):
         books = []
     return JsonResponse({'books': books})
 
+
 @csrf_exempt
 def crud_posting(request):
     query = request.GET.get('postingId')
