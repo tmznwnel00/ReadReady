@@ -5,37 +5,88 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Navbar from '../assets/components/Navbar';
 
 export default function PostingDetailPage ({ route, navigation }) {
-  const { post } = route.params;
-  const [likes, setLikes] = useState(post.like || 0);
-  const [comments, setComments] = useState(post.comment || []);
-  const [newComment, setNewComment] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(post.content);
-
-  const handleLike = () => {
-    const updatedLikes = likes + 1;
-    setLikes(updatedLikes);
-    fetch(`http://127.0.0.1:8000/posting/${post.id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ like: updatedLikes })
-    }).catch(error => console.error('Error updating likes:', error));
-  };
-
-  const handleComment = () => {
-    const updatedComments = [...comments, { username: 'currentUser', content: newComment }];
-    setComments(updatedComments);
-    setNewComment('');
-    fetch(`http://127.0.0.1:8000/posting/${post.id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ comment: updatedComments })
-    }).catch(error => console.error('Error updating comments:', error));
-  };
-
-  const handleModify = () => {
-    navigation.navigate('PostingPage', { post: { ...post, content: editContent } });
-  };
+    const { post } = route.params;
+    const [likes, setLikes] = useState(post.likes || 0);
+    const [comments, setComments] = useState(post.comments || []);
+    const [newComment, setNewComment] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
+    const [editContent, setEditContent] = useState(post.content);
+    const [currentUser, setCurrentUser] = useState(null);
+  
+    useEffect(() => {
+      // Load the current user from storage
+      const loadUser = async () => {
+        const user = await AsyncStorage.getItem('username');
+        setCurrentUser(user);
+      };
+  
+      loadUser();
+    }, []);
+  
+    const handleLike = () => {
+      const updatedLikes = likes + 1;
+      setLikes(updatedLikes);
+      // Update likes in the backend
+      fetch(`http://127.0.0.1:8000/posting/${post.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'like' })
+      }).catch(error => console.error('Error updating likes:', error));
+    };
+  
+    const handleComment = () => {
+      const commentData = { username: currentUser, content: newComment };
+      const updatedComments = [...comments, commentData];
+      setComments(updatedComments);
+      setNewComment('');
+      // Update comments in the backend
+      fetch(`http://127.0.0.1:8000/posting/${post.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'comment', username: currentUser, content: newComment })
+      }).catch(error => console.error('Error updating comments:', error));
+    };
+  
+    const handleModify = () => {
+      if (!isEditing) {
+        setIsEditing(true);
+      } else {
+        fetch(`http://127.0.0.1:8000/posting/${post.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: editContent })
+        })
+        .then(response => response.json())
+        .then(() => {
+          setIsEditing(false);
+          post.content = editContent; 
+        })
+        .catch(error => console.error('Error updating post:', error));
+      }
+    };
+  
+    const handleDelete = () => {
+      Alert.alert(
+        "Delete Post",
+        "Are you sure you want to delete this post?",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "OK", onPress: () => deletePost() }
+        ]
+      );
+    };
+  
+    const deletePost = () => {
+      fetch(`http://127.0.0.1:8000/posting/${post.id}`, {
+        method: 'DELETE'
+      })
+      .then(response => response.json())
+      .then(() => {
+        Alert.alert('Post Deleted', 'Your post has been deleted.');
+        navigation.goBack();  // Go back to the previous screen
+      })
+      .catch(error => console.error('Error deleting post:', error));
+    };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -57,9 +108,17 @@ export default function PostingDetailPage ({ route, navigation }) {
             <Icon name="thumb-up" size={20} color="#fff" />
             <Text style={styles.likeText}>{likes} Likes</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.editButton} onPress={() => setIsEditing(!isEditing)}>
-            <Text style={styles.editButtonText}>{isEditing ? 'Save' : 'Edit'}</Text>
-          </TouchableOpacity>
+          {currentUser === post.username && (
+            <TouchableOpacity style={styles.editButton} onPress={handleModify}>
+              <Text style={styles.editButtonText}>{isEditing ? 'Save' : 'Edit'}</Text>
+            </TouchableOpacity>
+          )}
+          {currentUser === post.username && (
+            <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+              <Icon name="delete" size={20} color="#fff" />
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </TouchableOpacity>
+          )}
         </View>
         <Text style={styles.sectionTitle}>Comments</Text>
         <View style={styles.commentsContainer}>
@@ -138,6 +197,17 @@ const styles = StyleSheet.create({
   editButtonText: {
     color: '#fff'
   },
+  deleteButton: {
+    backgroundColor: '#d9534f',
+    padding: 10,
+    borderRadius: 5,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  deleteButtonText: {
+    marginLeft: 5,
+    color: '#fff'
+  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -167,17 +237,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     marginBottom: 10
-  },
-  addButton: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginHorizontal: '10%',
-    marginBottom: 10
-  },
-  addButtonText: {
-    fontSize: 18,
-    color: '#fff'
   }
 });
