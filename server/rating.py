@@ -33,7 +33,7 @@ driver = webdriver.Chrome(options=chrome_options)
         
         
 for key, value in books.get().items():
-    if int(key) <= 6854846:
+    if int(key) <= 11340064:
         continue
     print(key)
     url = value.get('link')
