@@ -27,11 +27,11 @@ from django.contrib.auth.models import User
 #     def __str__(self):
 #         return self.item_id
 #
-# class BookSelection(models.Model):
-#   user = models.ForeignKey(User, on_delete=models.CASCADE)
-#   book_id = models.CharField(max_length=255)
-#   book_title = models.CharField(max_length=255)
-#   pages_read = models.IntegerField(default=0)
-#
-#   def __str__(self):
-#       return f"{self.book_title} - {self.pages_read} pages"
+class BookSelection(models.Model):
+   user = models.ForeignKey(User, on_delete=models.CASCADE)
+   book_id = models.CharField(max_length=255)
+   book_title = models.CharField(max_length=255)
+   pages_read = models.IntegerField(default=0)
+
+   def __str__(self):
+       return f"{self.book_title} - {self.pages_read} pages"
