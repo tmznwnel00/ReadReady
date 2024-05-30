@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Example using MaterialCommunityIcons
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Navbar from '../assets/components/Navbar';
 
 export default function CommunityPage({ navigation }) {
@@ -93,7 +93,8 @@ const styles = StyleSheet.create({
     postsList: {
       width: '100%',
       flexGrow: 1,
-      justifyContent: 'flex-start'  
+      justifyContent: 'flex-start' ,
+      height: 600,
     },
     
     postCard: {

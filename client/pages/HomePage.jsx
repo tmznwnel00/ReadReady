@@ -5,6 +5,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomePage({ route, navigation }) {
     const [username, setUsername] = useState('');
+    const [recommendations, setRecommendations] = useState([]);
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
         const loadUsername = async () => {
             const storedUsername = await AsyncStorage.getItem('username');
@@ -12,13 +15,29 @@ export default function HomePage({ route, navigation }) {
         };
 
         loadUsername();
+        fetchRecommendations();
     }, []);
-    const recommendations = [
-        { title: "Book Title 1", author: "Author 1", rating: "★★★★☆" },
-        { title: "Book Title 2", author: "Author 2", rating: "★★★★★" },
-        { title: "Book Title 3", author: "Author 2", rating: "★★★☆☆" },
-        // Add more books as needed
-    ];
+
+    const fetchRecommendations = async () => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/recommendation?username=${username}`, {
+                method: 'GET', 
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            const jsonData = await response.json();
+            if (response.ok) {
+                setRecommendations(jsonData);
+                setLoading(false);
+            } else {
+                throw new Error('Failed to fetch recommendations');
+            }
+        } catch (error) {
+            console.error('Error fetching recommendations:', error);
+            setLoading(false);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>

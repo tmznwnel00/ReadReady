@@ -12,7 +12,7 @@ from elasticsearch import Elasticsearch
 from firebase_admin import db
 from firebase_admin import db
 from urllib.parse import unquote
-
+from django.views.decorators.http import require_http_methods
 from .FM import recommendation
 
 fixed_salt = b'$2b$12$7Cth.Iwf3o/8VW1x2Ly/le'
@@ -61,21 +61,17 @@ def login_user(request):
 def logout_user(request):
     logout(request)
     return JsonResponse({'message': 'User logged out'})
-
 @csrf_exempt
+@require_http_methods(["GET", "POST"])
 def rating_book(request):
-    if request.method == 'POST':    
+    if request.method == 'POST':
         data = json.loads(request.body)
         username = data.get('username')
         itemId = data.get('itemId')
         rating = data.get('rating')
-        date = data.get('date')
+        date = data.get('date', time.time())
         description = data.get('description')
-        if not date:
-            date = time.time()
-        
-        # have to check username is exist and itemId exist
-        
+
         ref = db.reference('/ratings')
         new_row = ref.push({
             'username': username,
@@ -86,11 +82,27 @@ def rating_book(request):
         })
         new_row_key = new_row.key
         return JsonResponse({'message': 'Rating created', 'objectId': new_row_key})
+
     elif request.method == 'GET':
-        '''
-        TBD
-        '''
-        pass
+        book_id = request.GET.get('bookId')
+        if not book_id:
+            return JsonResponse({'error': 'Missing bookId'}, status=400)
+
+        ref = db.reference('/ratings')
+        all_reviews = ref.get()
+        review_list = []
+        if all_reviews:
+            for key, value in all_reviews.items():
+                if value['itemId'] == int(book_id):
+                    review_list.append({
+                        'username': value['username'],
+                        'rating': value['rating'],
+                        'date': value['date'],
+                        'description': value['description']
+                    })
+
+        return JsonResponse(review_list, safe=False)
+
     return JsonResponse({'error': 'Invalid request or missing data'}, status=400)
 
 def book_info(request):
