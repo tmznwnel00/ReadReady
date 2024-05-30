@@ -229,3 +229,34 @@ def book_recommendation(request):
     for book in sample:
         data.append(ref.child(str(book)).get())
     return JsonResponse({'message': data})
+
+@csrf_exempt
+def select_books(request):
+    ref = db.reference('/library')
+
+    data = json.loads(request.body)
+    username = data.get('username')
+    itemId = int(data.get('itemId'))
+    timestamp = time.time()
+    
+    new_book = ref.push({
+            'username': username,
+            'itemId': itemId,
+            'currentPage': 0,
+            'fullPage': 0,
+            'status': "reading",
+            'createdAt': timestamp
+    })
+    return JsonResponse({'message': 'Book is added to user library'})
+
+# @csrf_exempt
+# def record_full_pages(request):
+#     data = json.loads(request.body)
+#     username = data.get('username')
+#     itemId = int(data.get('itemId'))
+#     page = int(data.get('page'))
+
+
+# @csrf_exempt
+# def record_pages(request):
+    
