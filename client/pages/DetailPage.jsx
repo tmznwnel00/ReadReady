@@ -37,23 +37,36 @@ export default function DetailPage({ route, navigation }) {
       const response = await fetch(`http://127.0.0.1:8000/rating?bookId=${bookId}`);
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('Error fetching reviews:', errorText);
         throw new Error(`Error fetching reviews: ${errorText}`);
       }
       const data = await response.json();
-      setReviews(data);
+      console.log('Reviews received:', data);
+      setReviews(data.map(review => ({
+        ...review,
+        date: new Date(review.date * 1000).toLocaleDateString(),
+        ratingText: renderStarRating(review.rating)
+      })));
     } catch (error) {
       console.error('Error fetching reviews:', error);
     }
   };
+  
 
   const handlePostReview = async () => {
+    const ratingInt = parseInt(rateInput);  // Ensure rating is an integer
+    if (isNaN(ratingInt)) {
+      console.error('Invalid rating value:', rateInput);
+      return;  // Exit if the rating is not a valid number
+    }
+  
     const reviewData = {
       itemId: book.id,
       username: username,
-      rating: parseInt(rateInput),
-      description: reviewInput,
+      rating: ratingInt,
+      description: reviewInput.trim(),  // Trim to remove any extra whitespace
     };
-
+  
     try {
       const response = await fetch('http://127.0.0.1:8000/rating', {
         method: 'POST',
@@ -62,26 +75,33 @@ export default function DetailPage({ route, navigation }) {
         },
         body: JSON.stringify(reviewData),
       });
-      const data = await response.json();
-      setReviews([...reviews, data]);
-      setReviewInput('');
-      setRateInput('');
+      if (response.ok) {
+        const data = await response.json();
+        setReviews([...reviews, data]);
+        setReviewInput('');
+        setRateInput('');
+      } else {
+        throw new Error(`Failed to post review: ${await response.text()}`);
+      }
     } catch (error) {
       console.error('Error posting review:', error);
     }
   };
   
   const renderStarRating = (rating) => {
+    if (typeof rating !== 'number' || isNaN(rating)) return 'Rating unavailable';  // Handle non-number ratings
+  
     const fullStars = Math.floor(rating / 2);
     const halfStar = rating % 2 === 1;
     const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-
-    const stars = Array(fullStars).fill('★').join('');
-    const halfStarSymbol = halfStar ? '☆' : '';
-    const emptyStarsSymbol = Array(emptyStars).fill('☆').join('');
-
-    return stars + halfStarSymbol + emptyStarsSymbol;
+  
+    return (
+      Array(fullStars).fill('★').join('') +
+      (halfStar ? '☆' : '') +
+      Array(emptyStars).fill('☆').join('')
+    );
   };
+  
 
   return  (
     <SafeAreaView style={styles.container}>
@@ -126,7 +146,9 @@ export default function DetailPage({ route, navigation }) {
             value={reviewInput}
             onChangeText={setReviewInput}
           />
-          <Button title="Post" onPress={handlePostReview} />
+          <TouchableOpacity style={styles.postButton} onPress={handlePostReview}>
+            <Text style={styles.postText}>Post</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.reviewList}>
           {reviews.map((review, index) => (
@@ -293,4 +315,16 @@ const styles = StyleSheet.create({
     fontFamily: 'BlackAndWhite',
     fontSize: 20,
   },
+  postButton: {
+    width:'20%',
+    height: 40, 
+    backgroundColor: '#000',
+    borderRadius:5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  postText: {
+    color:'#fff',
+    fontSize:20,
+  }
 });

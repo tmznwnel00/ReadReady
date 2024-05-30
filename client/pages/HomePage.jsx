@@ -11,7 +11,10 @@ export default function HomePage({ route, navigation }) {
     useEffect(() => {
         const loadUsername = async () => {
             const storedUsername = await AsyncStorage.getItem('username');
-            if (storedUsername) setUsername(storedUsername);
+            if (storedUsername) {
+                setUsername(storedUsername);
+                fetchRecommendations(storedUsername.trim())
+            }
         };
 
         loadUsername();
@@ -20,7 +23,7 @@ export default function HomePage({ route, navigation }) {
 
     const fetchRecommendations = async () => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/recommendation?username=${username}`, {
+            const response = await fetch(`http://127.0.0.1:8000/recommendation?username=.`, {
                 method: 'GET', 
                 headers: {
                     'Content-Type': 'application/json',
@@ -28,7 +31,7 @@ export default function HomePage({ route, navigation }) {
             });
             const jsonData = await response.json();
             if (response.ok) {
-                setRecommendations(jsonData);
+                setRecommendations(jsonData.message); 
                 setLoading(false);
             } else {
                 throw new Error('Failed to fetch recommendations');
@@ -50,10 +53,9 @@ export default function HomePage({ route, navigation }) {
                 <ScrollView vertical={true} style={styles.recommendationsScrollView}>
                     {recommendations.map((book, index) => (
                         <View key={index} style={styles.bookCard}>
-                            
                             <Text style={styles.bookTitle}>{book.title}</Text>
                             <Text style={styles.bookAuthor}>{book.author}</Text>
-                            <Text style={styles.bookRating}>{book.rating}</Text>
+                            {/*<Text style={styles.bookRating}>{book.rating}</Text>*/}
                         </View>
                     ))}
                 </ScrollView>
@@ -93,7 +95,7 @@ const styles = StyleSheet.create({
         width: '80%',
         alignItems: 'center',
         position: 'absolute',
-        top: '-10%',
+        top: '-5%',
 
     },
     bookshelf: {
@@ -123,20 +125,21 @@ const styles = StyleSheet.create({
     },
     recommendationsScrollView: {
         width: '100%',
+        height: 400,
     },
     bookCard: {
         backgroundColor: '#2F2F2F',
         borderRadius: 5,
         marginHorizontal: 10,
         shadowColor: "#000",
-        height: 130,
+        height: 'auto',
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
-        margin: 20,
+        marginHorizontal: 20,
+        marginVertical:10,
         alignItems:'center',
         justifyContent: 'center',
-        
     },
     bookCover: {
         width: 130, 
@@ -146,16 +149,18 @@ const styles = StyleSheet.create({
     },
     bookTitle: {
         color: '#fff',
-        fontSize: 20,
-        lineHeight: 50,
-        fontFamily: 'Bokor-Regular',
-        marginTop: -10,
+        fontSize: 18,
+        marginTop: 10,
+        width: '80%',
+        textAlign: 'center',
+        marginBottom: 10,
     },
     bookAuthor: {
         color: '#fff',
-        fontSize: 18,
-        lineHeight: 30,
-        fontFamily: 'Bokor-Regular'
+        fontSize: 15,
+        marginBottom:10,
+        width: '80%',
+        textAlign: 'center',
     },
     bookRating: {
         color: '#fff',

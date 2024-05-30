@@ -128,11 +128,13 @@ const styles = StyleSheet.create({
         lineHeight: 30,
     },
     addButton: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#000',
         marginHorizontal: '10%',
+        width: '70%',
         padding: 15,
         borderRadius: 10,
         alignItems: 'center',
+        alignSelf:'center',
         marginBottom: 10,
     },
     addButtonText: {
