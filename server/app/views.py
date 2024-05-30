@@ -146,6 +146,8 @@ def crud_posting(request):
             post = ref.child(query).get()
             if post:
                 return JsonResponse(post)
+            else:
+                return JsonResponse({'error': 'Post not found'}, status=404)
         elif request.method == 'DELETE':
             ref.child(query).delete()
             return JsonResponse({'message': 'Posting is deleted'})

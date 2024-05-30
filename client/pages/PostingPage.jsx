@@ -34,7 +34,7 @@ export default function PostingPage({ route, navigation }) {
         username
       };
     
-      const url = isEditing ? `http://127.0.0.1:8000/posting/${route.params.post.id}` : 'http://127.0.0.1:8000/posting';
+      const url = isEditing ? `http://127.0.0.1:8000/posting?postingId=${route.params.post.id}` : 'http://127.0.0.1:8000/posting';
       const method = isEditing ? 'PUT' : 'POST';
     
       try {
@@ -43,20 +43,19 @@ export default function PostingPage({ route, navigation }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(postData)
         });
-    
+        
+        const data = await response.json();
+        
         if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Failed to ${isEditing ? 'update' : 'add'} post: ${errorText}`);
+          throw new Error(`Failed to ${isEditing ? 'update' : 'add'} post: ${data.error}`);
         }
-    
-        const newPost = await response.json();
-        navigation.navigate('Community', { newPost });
+        
+        navigation.navigate('Community', { newPost: { id: data.id, ...postData } });
       } catch (error) {
         console.error('Error adding/updating post:', error);
-        // Optionally show an alert to the user
-        Alert.alert('Error', `Failed to ${isEditing ? 'update' : 'add'} post. Please try again.`);
       }
     };
+    
     
     
 
