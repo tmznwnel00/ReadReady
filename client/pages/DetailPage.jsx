@@ -17,8 +17,6 @@ export default function DetailPage({ route, navigation }) {
   };
 
   useEffect(() => {
-    console.log('Book object:', book); // Debugging
-    console.log('Book cover URL:', book.cover); // Debugging
     fetchReviewsForBook(book.id);
   }, [book.id]);
   
@@ -41,30 +39,34 @@ export default function DetailPage({ route, navigation }) {
         throw new Error(`Error fetching reviews: ${errorText}`);
       }
       const data = await response.json();
-      console.log('Reviews received:', data);
-      setReviews(data.map(review => ({
+      const formattedData = data.map(review => ({
         ...review,
         date: new Date(review.date * 1000).toLocaleDateString(),
         ratingText: renderStarRating(review.rating)
-      })));
+      })).reverse();
+      setReviews(formattedData);
     } catch (error) {
       console.error('Error fetching reviews:', error);
     }
   };
   
+  
 
   const handlePostReview = async () => {
-    const ratingInt = parseInt(rateInput);  // Ensure rating is an integer
+    const ratingInt = parseInt(rateInput);
     if (isNaN(ratingInt)) {
       console.error('Invalid rating value:', rateInput);
-      return;  // Exit if the rating is not a valid number
+      return;
     }
+  
+    const currentDate = new Date();
   
     const reviewData = {
       itemId: book.id,
       username: username,
       rating: ratingInt,
-      description: reviewInput.trim(),  // Trim to remove any extra whitespace
+      description: reviewInput.trim(),
+      date: currentDate.getTime() / 1000 
     };
   
     try {
@@ -76,8 +78,12 @@ export default function DetailPage({ route, navigation }) {
         body: JSON.stringify(reviewData),
       });
       if (response.ok) {
-        const data = await response.json();
-        setReviews([...reviews, data]);
+        const newReview = {
+          ...reviewData,
+          date: currentDate.toLocaleDateString(), 
+          ratingText: renderStarRating(ratingInt) 
+        };
+        setReviews([...reviews, newReview]);
         setReviewInput('');
         setRateInput('');
       } else {
@@ -88,8 +94,9 @@ export default function DetailPage({ route, navigation }) {
     }
   };
   
+  
   const renderStarRating = (rating) => {
-    if (typeof rating !== 'number' || isNaN(rating)) return 'Rating unavailable';  // Handle non-number ratings
+    if (typeof rating !== 'number' || isNaN(rating)) return 'Rating unavailable';
   
     const fullStars = Math.floor(rating / 2);
     const halfStar = rating % 2 === 1;
@@ -154,7 +161,7 @@ export default function DetailPage({ route, navigation }) {
           {reviews.map((review, index) => (
             <View key={index} style={styles.reviewItem}>
               <Text style={styles.reviewUsername}>{review.username}</Text>
-              <Text style={styles.reviewDate}>{new Date(review.date * 1000).toLocaleDateString()}</Text>
+              <Text style={styles.reviewDate}>{review.date}</Text>
               <Text style={styles.reviewRating}>{renderStarRating(review.rating)}</Text>
               <Text style={styles.reviewDescription}>{review.description}</Text>
             </View>
