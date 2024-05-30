@@ -1,3 +1,4 @@
+import random
 import os
 import json
 import time
@@ -222,6 +223,8 @@ def book_recommendation(request):
     query = request.GET.get('username')
     ref = db.reference('/books')
     data = []
-    for book in recommendation(query):
+    result = recommendation(query)
+    sample = random.sample(result, 5)
+    for book in sample:
         data.append(ref.child(str(book)).get())
     return JsonResponse({'message': data})
