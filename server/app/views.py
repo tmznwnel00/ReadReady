@@ -62,14 +62,15 @@ def login_user(request):
 def logout_user(request):
     logout(request)
     return JsonResponse({'message': 'User logged out'})
+
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def rating_book(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         username = data.get('username')
-        itemId = data.get('itemId')
-        rating = data.get('rating')
+        itemId = int(data.get('itemId'))
+        rating = int(data.get('rating'))
         date = data.get('date', time.time())
         description = data.get('description')
 
