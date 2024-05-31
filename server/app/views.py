@@ -231,23 +231,35 @@ def book_recommendation(request):
     return JsonResponse({'message': data})
 
 @csrf_exempt
-def select_books(request):
+def library(request):
     ref = db.reference('/library')
 
-    data = json.loads(request.body)
-    username = data.get('username')
-    itemId = int(data.get('itemId'))
-    timestamp = time.time()
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data.get('username')
+        itemId = int(data.get('itemId'))
+        timestamp = time.time()
+        
+        new_book = ref.push({
+                'username': username,
+                'itemId': itemId,
+                'currentPage': 0,
+                'fullPage': 0,
+                'status': "reading",
+                'createdAt': timestamp
+        })
+        return JsonResponse({'message': 'Book is added to user library'})
     
-    new_book = ref.push({
-            'username': username,
-            'itemId': itemId,
-            'currentPage': 0,
-            'fullPage': 0,
-            'status': "reading",
-            'createdAt': timestamp
-    })
-    return JsonResponse({'message': 'Book is added to user library'})
+    elif request.method == 'GET':
+        username = request.GET.get('username')
+        query = ref.get()
+        result = []
+        for key, value in query.items():
+            if value['username'] == username and value['status'] == 'reading':
+                result.append(value)
+        result.reverse()
+        return JsonResponse({'library': result})
+
 
 # @csrf_exempt
 # def record_full_pages(request):
