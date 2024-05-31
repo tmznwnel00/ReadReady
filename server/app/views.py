@@ -229,3 +229,75 @@ def book_recommendation(request):
     for book in sample:
         data.append(ref.child(str(book)).get())
     return JsonResponse({'message': data})
+
+@csrf_exempt
+def library(request):
+    ref = db.reference('/library')
+
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data.get('username')
+        itemId = int(data.get('itemId'))
+        timestamp = time.time()
+        
+        new_book = ref.push({
+                'username': username,
+                'itemId': itemId,
+                'currentPage': 0,
+                'fullPage': 0,
+                'status': "reading",
+                'createdAt': timestamp
+        })
+        return JsonResponse({'message': 'Book is added to user library'})
+    
+    elif request.method == 'GET':
+        username = request.GET.get('username')
+        query = ref.get()
+        result = []
+        for key, value in query.items():
+            if value['username'] == username and value['status'] == 'reading':
+                result.append(value)
+        result.reverse()
+        return JsonResponse({'library': result})
+
+@csrf_exempt
+def record_full_pages(request):
+    ref = db.reference('/library')
+    data = json.loads(request.body)
+    libraryId = data.get('libraryId')
+    page = int(data.get('page'))
+
+    library_data = ref.child(libraryId)
+
+    library_data.update({
+        'fullPage': page
+    })
+
+    return JsonResponse({'message': 'Full page value is updated'})
+    
+@csrf_exempt
+def record_pages(request):
+    ref = db.reference('/library')
+    data = json.loads(request.body)
+    libraryId = data.get('libraryId')
+    page = int(data.get('page'))
+
+    library_data = ref.child(libraryId)
+    library_data_dict = library_data.get()
+
+    current_page = library_data_dict.get('currentPage', 0)
+    full_page = library_data_dict.get('fullPage', 0)
+    print(current_page)
+    new_page = current_page + page
+
+    if new_page >= full_page:
+        library_data.update({
+            'currentPage': new_page,
+            'status': "finished"
+        })
+    else:
+        library_data.update({
+            'currentPage': new_page
+        })
+
+    return JsonResponse({'message': 'Reading page value is updated'})
