@@ -260,15 +260,44 @@ def library(request):
         result.reverse()
         return JsonResponse({'library': result})
 
+@csrf_exempt
+def record_full_pages(request):
+    ref = db.reference('/library')
+    data = json.loads(request.body)
+    libraryId = data.get('libraryId')
+    page = int(data.get('page'))
 
-# @csrf_exempt
-# def record_full_pages(request):
-#     data = json.loads(request.body)
-#     username = data.get('username')
-#     itemId = int(data.get('itemId'))
-#     page = int(data.get('page'))
+    library_data = ref.child(libraryId)
 
+    library_data.update({
+        'fullPage': page
+    })
 
-# @csrf_exempt
-# def record_pages(request):
+    return JsonResponse({'message': 'Full page value is updated'})
     
+@csrf_exempt
+def record_pages(request):
+    ref = db.reference('/library')
+    data = json.loads(request.body)
+    libraryId = data.get('libraryId')
+    page = int(data.get('page'))
+
+    library_data = ref.child(libraryId)
+    library_data_dict = library_data.get()
+
+    current_page = library_data_dict.get('currentPage', 0)
+    full_page = library_data_dict.get('fullPage', 0)
+    print(current_page)
+    new_page = current_page + page
+
+    if new_page >= full_page:
+        library_data.update({
+            'currentPage': new_page,
+            'status': "finished"
+        })
+    else:
+        library_data.update({
+            'currentPage': new_page
+        })
+
+    return JsonResponse({'message': 'Reading page value is updated'})
