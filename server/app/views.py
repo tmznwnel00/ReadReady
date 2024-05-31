@@ -233,7 +233,7 @@ def book_recommendation(request):
 @csrf_exempt
 def library(request):
     ref = db.reference('/library')
-
+    libraryId = request.GET.get('libraryId')
     if request.method == 'POST':
         data = json.loads(request.body)
         username = data.get('username')
@@ -251,14 +251,22 @@ def library(request):
         return JsonResponse({'message': 'Book is added to user library'})
     
     elif request.method == 'GET':
-        username = request.GET.get('username')
-        query = ref.get()
-        result = []
-        for key, value in query.items():
-            if value['username'] == username and value['status'] == 'reading':
-                result.append(value)
-        result.reverse()
-        return JsonResponse({'library': result})
+        if libraryId:
+            return JsonResponse({'book': ref.child(libraryId).get()})
+        else:
+            username = request.GET.get('username')
+            books = db.reference('/books')
+            query = ref.get()
+            result = []
+            for key, value in query.items():
+                if value['username'] == username and value['status'] == 'reading':
+                    book = books.child(str(value['itemId'])).get()
+                    new_data = {
+                        key: book
+                    }
+                    result.append(new_data)
+            result.reverse()
+            return JsonResponse({'library': result})
 
 @csrf_exempt
 def record_full_pages(request):
@@ -287,7 +295,6 @@ def record_pages(request):
 
     current_page = library_data_dict.get('currentPage', 0)
     full_page = library_data_dict.get('fullPage', 0)
-    print(current_page)
     new_page = current_page + page
 
     if new_page >= full_page:
