@@ -133,9 +133,10 @@ export default function DetailPage({ route, navigation }) {
           <Text style={styles.bookAuthor}>{book.author}</Text>
           <Text style={styles.bookDescription}>{book.description}</Text>
         </View>
-        <TouchableOpacity style={styles.progress} onPress={() => navigation.navigate('Progress', { book })}>
+        <TouchableOpacity style={styles.progress} onPress={() => navigation.navigate('Progress', { itemId: book.id })}>
           <Text style={styles.progressText}>Progress</Text>
         </TouchableOpacity>
+
 
         <View style={styles.reviewContainer}>
           <Text style={styles.textReview}>Review</Text>

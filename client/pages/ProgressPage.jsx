@@ -1,99 +1,132 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, SafeAreaView, TouchableOpacity, Button } from 'react-native';
+import { StyleSheet, View, Text, TextInput, SafeAreaView, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Navbar from '../assets/components/Navbar';
 
 export default function ProgressPage({ route, navigation }) {
-    const [readingList, setReadingList] = useState([]);
+    const { itemId } = route.params;
     const [currentPage, setCurrentPage] = useState('');
     const [totalPages, setTotalPages] = useState('');
-    const [isInReadingList, setIsInReadingList] = useState(false);
-
-    const { book } = route.params || {};
+    const [username, setUsername] = useState('');
+    const [libraryId, setLibraryId] = useState(null);
 
     useEffect(() => {
-        if (book && book.libraryId) {
-            fetchLibraryData(book.libraryId);
-        }
-    }, [book?.libraryId]);
-
-    const fetchLibraryData = async (libraryId) => {
-        try {
-            const response = await fetch(`http://127.0.0.1/library?libraryId=${libraryId}`);
-            const data = await response.json();
-            if (data.book) {
-                setCurrentPage(data.book.currentPage.toString());
-                setTotalPages(data.book.fullPage.toString());
-                setIsInReadingList(true);
+        const loadUsername = async () => {
+            const storedUsername = await AsyncStorage.getItem('username');
+            if (storedUsername) {
+                setUsername(storedUsername.trim());
             }
-        } catch (error) {
-            console.error('Failed to fetch library data:', error);
-        }
-    };
-
-
-    const updateBookProgress = async () => {
-        const url = `http://127.0.0.1/library/current_page`;
-        const body = {
-            libraryId: book.libraryId,
-            page: parseInt(currentPage),
         };
 
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(body),
-            });
-            const result = await response.json();
-            console.log('Progress updated:', result.message);
-        } catch (error) {
-            console.error('Failed to update book progress:', error);
-        }
-    };
+        loadUsername();
 
-    const updateTotalPages = async (totalPages) => {
-        const url = `http://127.0.0.1/library/full_page`;
-        const body = {
-            libraryId: book.libraryId,
-            page: parseInt(totalPages),
+        const fetchLibraryData = async () => {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/library?username=${username}`);
+                const data = await response.json();
+                if (response.ok) {
+                    const book = data.library.find(item => item.itemId === itemId);
+                    if (book) {
+                        setCurrentPage(book.currentPage.toString());
+                        setTotalPages(book.fullPage.toString());
+                        setLibraryId(book.libraryId);
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+            }
         };
 
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(body),
-            });
-            const json = await response.json();
-            console.log('Total pages updated:', json.message);
-        } catch (error) {
-            console.error('Error updating total pages:', error);
+        if (username) {
+            fetchLibraryData();
         }
-    };
+    }, [username, itemId]);
 
     const handleCurrentPageChange = (text) => {
         setCurrentPage(text);
-        updateBookProgress();
     };
 
     const handleTotalPagesChange = (text) => {
         setTotalPages(text);
-        updateTotalPages(text);
     };
 
-    if (!book) {
-        return (
-            <SafeAreaView style={styles.container}>
-                <Text style={styles.error}>Book data is not available.</Text>
-                <Button title="Go Back" onPress={() => navigation.goBack()} />
-            </SafeAreaView>
-        );
-    }
+    const updateBookProgress = async () => {
+        if (!username || !itemId) {
+            alert('Username and Item ID are required');
+            return;
+        }
+
+        try {
+            if (libraryId) {
+                // Update existing library entry
+                const response1 = await fetch('http://127.0.0.1:8000/library/current_page', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        libraryId: libraryId,
+                        page: parseInt(currentPage),
+                    }),
+                });
+
+                if (!response1.ok) {
+                    throw new Error('Failed to update current page');
+                }
+
+                const response2 = await fetch('http://127.0.0.1:8000/library/full_page', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        libraryId: libraryId,
+                        page: parseInt(totalPages),
+                    }),
+                });
+
+                if (!response2.ok) {
+                    throw new Error('Failed to update total pages');
+                }
+
+                const responseData1 = await response1.json();
+                const responseData2 = await response2.json();
+
+                if (responseData1.message === 'Book finished and removed from library') {
+                    alert('Book finished and removed from library');
+                } else {
+                    alert('Progress updated successfully!');
+                }
+            } else {
+                // Create new library entry
+                const createResponse = await fetch('http://127.0.0.1:8000/library', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        itemId: itemId,
+                        currentPage: parseInt(currentPage),
+                        fullPage: parseInt(totalPages),
+                    }),
+                });
+
+                if (!createResponse.ok) {
+                    const errorData = await createResponse.json();
+                    throw new Error(errorData.error || 'Failed to create library entry');
+                }
+
+                alert('Library entry created and progress updated successfully!');
+            }
+
+            // Navigate back to the Library page and reload it
+            navigation.navigate('Library', { refresh: true });
+        } catch (error) {
+            console.error(error);
+            alert('Failed to update progress.');
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -142,14 +175,14 @@ const styles = StyleSheet.create({
         marginTop: 120,
     },
     title: {
-        marginTop: '20%', 
+        marginTop: '20%',
         fontSize: 40,
     },
     input: {
         fontSize: 15,
         backgroundColor: '#fff',
         padding: 10,
-        width: 120, 
+        width: 120,
         textAlign: 'center',
         marginHorizontal: 30,
     },

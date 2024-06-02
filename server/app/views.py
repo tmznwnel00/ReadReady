@@ -235,78 +235,119 @@ def book_recommendation(request):
 @csrf_exempt
 def library(request):
     ref = db.reference('/library')
-    libraryId = request.GET.get('libraryId')
+    books_ref = db.reference('/books')
     if request.method == 'POST':
-        data = json.loads(request.body)
-        username = data.get('username')
-        itemId = int(data.get('itemId'))
-        timestamp = time.time()
-        
-        new_book = ref.push({
+        try:
+            data = json.loads(request.body)
+            username = data.get('username')
+            itemId = data.get('itemId')
+            currentPage = data.get('currentPage', 0)
+            fullPage = data.get('fullPage', 0)
+
+            if not username or not itemId:
+                return JsonResponse({'error': 'username and itemId are required'}, status=400)
+
+            itemId = int(itemId)
+            currentPage = int(currentPage)
+            fullPage = int(fullPage)
+            timestamp = time.time()
+
+            query = ref.order_by_child('username').equal_to(username).get()
+            for key, value in query.items():
+                if value['itemId'] == itemId:
+                    library_data = ref.child(key)
+                    library_data.update({
+                        'currentPage': currentPage,
+                        'fullPage': fullPage,
+                        'status': 'reading'
+                    })
+                    return JsonResponse({'message': 'Book progress updated', 'libraryId': key})
+
+            new_book = ref.push({
                 'username': username,
                 'itemId': itemId,
-                'currentPage': 0,
-                'fullPage': 0,
-                'status': "reading",
+                'currentPage': currentPage,
+                'fullPage': fullPage,
+                'status': 'reading',
                 'createdAt': timestamp
-        })
-        return JsonResponse({'message': 'Book is added to user library'})
-    
+            })
+            new_library_id = new_book.key
+            return JsonResponse({'message': 'Book is added to user library', 'libraryId': new_library_id})
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
     elif request.method == 'GET':
-        if libraryId:
-            return JsonResponse({'book': ref.child(libraryId).get()})
-        else:
-            username = request.GET.get('username')
-            books = db.reference('/books')
-            query = ref.get()
-            result = []
+        username = request.GET.get('username')
+        if not username:
+            return JsonResponse({'error': 'username is required'}, status=400)
+
+        try:
+            query = ref.order_by_child('username').equal_to(username).get()
+            library_books = []
             for key, value in query.items():
-                if value['username'] == username and value['status'] == 'reading':
-                    book = books.child(str(value['itemId'])).get()
-                    new_data = {
-                        key: book
-                    }
-                    result.append(new_data)
-            result.reverse()
-            return JsonResponse({'library': result})
+                book_info = books_ref.child(str(value['itemId'])).get()
+                if book_info:
+                    value.update({
+                        'title': book_info.get('title'),
+                        'author': book_info.get('author')
+                    })
+                library_books.append({
+                    'libraryId': key,
+                    **value
+                })
+
+            return JsonResponse({'library': library_books})
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 @csrf_exempt
 def record_full_pages(request):
-    ref = db.reference('/library')
-    data = json.loads(request.body)
-    libraryId = data.get('libraryId')
-    page = int(data.get('page'))
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        library_id = data.get('libraryId')
+        page = int(data.get('page'))
 
-    library_data = ref.child(libraryId)
+        library_data = db.reference('/library').child(library_id).get()
+        if not library_data:
+            return JsonResponse({'error': 'Library entry not found'}, status=404)
 
-    library_data.update({
-        'fullPage': page
-    })
+        db.reference('/library').child(library_id).update({
+            'fullPage': page
+        })
 
-    return JsonResponse({'message': 'Full page value is updated'})
-    
+        return JsonResponse({'message': 'Full page value is updated'})
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 @csrf_exempt
 def record_pages(request):
-    ref = db.reference('/library')
-    data = json.loads(request.body)
-    libraryId = data.get('libraryId')
-    page = int(data.get('page'))
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        library_id = data.get('libraryId')
+        page = int(data.get('page'))
 
-    library_data = ref.child(libraryId)
-    library_data_dict = library_data.get()
+        library_data = db.reference('/library').child(library_id).get()
+        if not library_data:
+            return JsonResponse({'error': 'Library entry not found'}, status=404)
 
-    current_page = library_data_dict.get('currentPage', 0)
-    full_page = library_data_dict.get('fullPage', 0)
-    new_page = current_page + page
+        current_page = library_data.get('currentPage', 0)
+        full_page = library_data.get('fullPage', 0)
+        new_page = current_page + page
 
-    if new_page >= full_page:
-        library_data.update({
-            'currentPage': new_page,
-            'status': "finished"
-        })
-    else:
-        library_data.update({
-            'currentPage': new_page
-        })
+        if new_page >= full_page:
+            db.reference('/library').child(library_id).update({
+                'currentPage': new_page,
+                'status': "finished"
+            })
+            db.reference('/library').child(library_id).delete()
+            return JsonResponse({'message': 'Book finished and removed from library'})
+        else:
+            db.reference('/library').child(library_id).update({
+                'currentPage': new_page
+            })
+            return JsonResponse({'message': 'Reading page value is updated'})
 
-    return JsonResponse({'message': 'Reading page value is updated'})
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
