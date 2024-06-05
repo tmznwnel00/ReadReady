@@ -6,8 +6,11 @@ import time
 import pygal
 from pygal.style import Style
 from django.shortcuts import render
-from django.http import HttpResponse
-from .models import Book, Category
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+frome datetime import timedelta
+from .models import Book, Category, DailyReadingProgress
 
 import bcrypt
 from dotenv import load_dotenv
@@ -385,3 +388,51 @@ def user_books_analysis(request):
         pie_chart.add(category, count)
 
     return HttpResponse(pie_chart.render(), content_type='image/svg+xml')
+
+@csrf_exempt
+def record_daily_progress(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data.get('username')
+        pages_read = int(data.get('pages_read'))
+
+        today = timezone.now().date()
+        progress, created = DailyReadingProgress.objects.get_or_create(username=username, date=today)
+        if created:
+            progress.pages_read = pages_read
+        else:
+            progress.pages_read += pages_read
+        progress.save()
+
+        return JsonResponse({'message': 'Daily progress recorded'})
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+def daily_progress_graph(request):
+    username = request.GET.get('username')
+    if not username:
+        return JsonResponse({'error': 'username is required'}, status=400)
+    
+    today = timezone.now().date()
+    start_date = today - timedelta(days=6)
+    daily_data = DailyReadingProgress.objects.filter(username=username, date__range=[start_date, today])
+
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    date_to_day = { (today - timedelta(days=i)).strftime('%Y-%m-%d'): days[(today - timedelta(days=i)).weekday()] for i in range(7)}
+
+    daily_pages = {date_to_day[(today - timedelta(days=i)).strftime('%Y-%m-%d')]: 0 for i in range(7)}
+
+    for entry in daily_data:
+        day = date_to_day[entry.date.strftime('%Y-%m-%d')]
+        daily_pages[day] = entry.pages_read
+
+    custom_style = Style(
+        colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765')
+    )
+
+    bar_chart = pygal.Bar(style=custom_style)
+    bar_chart.title = 'Pages Read Over the Last 7 Days'
+    for day, pages in daily_pages.items():
+        bar_chart.add(day, pages)
+
+    return HttpResponse(bar_chart.render(), content_type='image/svg+xml')
