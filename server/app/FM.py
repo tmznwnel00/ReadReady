@@ -6,7 +6,7 @@ import numpy as np
 from .trainset import vectorX, vectorY, user_set, book_set, grouped_rating_data
 
 class FactorizationMachine(tf.keras.Model):
-    def __init__(self, num_features, num_factors, reg_w=0.01, reg_v=0.01):
+    def __init__(self, num_features, num_factors, reg_w=0.02, reg_v=0.02):
         super(FactorizationMachine, self).__init__()
         self.num_features = num_features
         self.num_factors = num_factors
@@ -38,7 +38,7 @@ train_dataset = tf.data.Dataset.from_tensor_slices((vectorX, vectorY))
 num_features = vectorX.shape[1]
 num_factors = 10
 model = FactorizationMachine(num_features, num_factors)
-optimizer = tf.keras.optimizers.Adam(learning_rate = 0.1)
+optimizer = tf.keras.optimizers.RMSprop(learning_rate = 0.001)
 
 num_epochs = 5
 for epoch in range(num_epochs):
