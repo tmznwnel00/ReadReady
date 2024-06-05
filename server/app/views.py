@@ -3,6 +3,12 @@ import os
 import json
 import time
 
+import pygal
+from pygal.style import Style
+from django.shortcuts import render
+from django.http import HttpResponse
+from .models import Book, Category
+
 import bcrypt
 from dotenv import load_dotenv
 from django.contrib.auth import authenticate, login, logout
@@ -351,3 +357,31 @@ def record_pages(request):
             return JsonResponse({'message': 'Reading page value is updated'})
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+def user_books_analysis(request):
+    username = request.GET.get('username')
+    if not username:
+        return JsonResponse({'error': 'username is required'}, status=400)
+    
+    ref = db.reference('/library')
+    query = ref.order_by_child('username').equal_to(username).get()
+    category_count = {}
+
+    for key, value in query.items():
+        book_id = value['itemId']
+        book_info = Book.objects.get(item_id=book_id)
+        category = book_info.category.name
+        if category in category_count:
+            category_count[category] += 1
+        else:
+            category_count[category] = 1
+
+    custom_style = Style(
+        colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765')
+    )
+
+    pie_chart = pygal.Pie(style=custom_style, inner_radius=.4)
+    for category, count in category_count.items():
+        pie_chart.add(category, count)
+
+    return HttpResponse(pie_chart.render(), content_type='image/svg+xml')
