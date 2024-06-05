@@ -31,5 +31,7 @@ urlpatterns = [
     path('library', library, name='library'),
     path('library/full_page', record_full_pages, name='full_page'),
     path('library/current_page', record_pages, name='current_page'),
-    path('analysis', user_books_analysis, name='user_books_analysis')
+    path('analysis', user_books_analysis, name='user_books_analysis'),
+    path('daily_progress', record_daily_progress, name='record_daily_progress'),
+    path('daily_progress_graph', daily_progress_graph, name='daily_progress_graph')
 ]
