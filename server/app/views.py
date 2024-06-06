@@ -9,7 +9,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-frome datetime import timedelta
+from datetime import timedelta
 from .models import Book, Category, DailyReadingProgress
 
 import bcrypt
