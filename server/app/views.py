@@ -333,9 +333,7 @@ def record_pages(request):
         if not library_data:
             return JsonResponse({'error': 'Library entry not found'}, status=404)
 
-        current_page = library_data.get('currentPage', 0)
         full_page = library_data.get('fullPage', 0)
-        new_page = current_page + page
 
         db.reference('/log').push({
                 'username': library_data.get('username'),
@@ -345,16 +343,15 @@ def record_pages(request):
                 'date': time.time()
         })
 
-        if new_page >= full_page:
+        if page >= full_page:
             db.reference('/library').child(library_id).update({
-                'currentPage': new_page,
+                'currentPage': page,
                 'status': "finished"
             })
-            db.reference('/library').child(library_id).delete()
             return JsonResponse({'message': 'Book finished and removed from library'})
         else:
             db.reference('/library').child(library_id).update({
-                'currentPage': new_page
+                'currentPage': page
             })
             return JsonResponse({'message': 'Reading page value is updated'})
 

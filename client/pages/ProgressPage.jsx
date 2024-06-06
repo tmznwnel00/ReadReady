@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, SafeAreaView, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ProgressBar } from 'react-native-paper'; // Import ProgressBar
 import Navbar from '../assets/components/Navbar';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Import Icon from vector icons
 
 export default function ProgressPage({ route, navigation }) {
     const { itemId } = route.params;
@@ -128,6 +130,9 @@ export default function ProgressPage({ route, navigation }) {
         }
     };
 
+    const progress = totalPages ? (currentPage / totalPages) : 0;
+    const progressPercentage = Math.round(progress * 100);
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.progressContainer}>
@@ -152,6 +157,14 @@ export default function ProgressPage({ route, navigation }) {
                 <TouchableOpacity style={styles.submit} onPress={updateBookProgress}>
                     <Text style={styles.submitText}>Submit</Text>
                 </TouchableOpacity>
+                <View style={styles.progressBarContainer}>
+                    <ProgressBar 
+                        progress={progress} 
+                        color="#000"
+                        style={styles.progressBar} 
+                    />
+                    <Text style={styles.progressText}>{progressPercentage}%</Text>
+                </View>
             </View>
             <Navbar navigation={navigation} />
         </SafeAreaView>
@@ -165,8 +178,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     progressContainer: {
-        justifyContent: 'center',
         alignItems: 'center',
+        flex: 1,
+        marginTop: 20,
     },
     pagesContainer: {
         flexDirection: 'row',
@@ -185,6 +199,22 @@ const styles = StyleSheet.create({
         width: 120,
         textAlign: 'center',
         marginHorizontal: 30,
+    },
+    progressBarContainer: {
+        width: '80%',
+        alignItems: 'center',
+        marginTop: 100,
+        position: 'relative',
+    },
+    progressBar: {
+        width: '100%',
+        height: 30,
+    },
+    progressText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#000',
+        marginTop: -10,
     },
     submit: {
         backgroundColor: '#000',

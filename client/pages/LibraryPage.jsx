@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
         height: 600,
     },
     bookCard: {
-        width: '90%',
+        width: '100%',
         padding: 20,
         marginVertical: 10,
         backgroundColor: '#fff',
