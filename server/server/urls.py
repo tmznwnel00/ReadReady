@@ -17,7 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from app.views import book_recommendation, book_info, book_search, crud_posting, \
-    signup, library, login_user, logout_user, rating_book, record_full_pages, record_pages, user_books_analysis
+    signup, library, login_user, logout_user, rating_book, record_full_pages, record_pages, 
+    user_books_analysis, record_daily_progress, daily_progress_graph
 
 urlpatterns = [
     path('signup', signup, name='signup'),
