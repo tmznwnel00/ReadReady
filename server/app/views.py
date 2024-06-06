@@ -337,6 +337,14 @@ def record_pages(request):
         full_page = library_data.get('fullPage', 0)
         new_page = current_page + page
 
+        db.reference('/log').push({
+                'username': library_data.get('username'),
+                'itemId': library_data.get('itemId'),
+                'libraryId': library_id,
+                'addedPage': page,
+                'date': time.time()
+        })
+
         if new_page >= full_page:
             db.reference('/library').child(library_id).update({
                 'currentPage': new_page,
