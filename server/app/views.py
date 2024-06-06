@@ -227,7 +227,10 @@ def book_recommendation(request):
     ref = db.reference('/books')
     data = []
     result = recommendation(query)
-    sample = random.sample(result, 5)
+    if len(result) >= 5:
+        sample = random.sample(result, 5)
+    else:
+        sample = result
     for book in sample:
         data.append(ref.child(str(book)).get())
     return JsonResponse({'message': data})
