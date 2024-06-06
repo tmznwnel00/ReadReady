@@ -25,6 +25,13 @@ jobs:
         pip install firebase_admin
         pip install python-dotenv
 
+    - name: create-json
+      id: create-json
+      uses: jsdaniell/create-json@1.1.2
+      with:
+        name: "secrets.json"
+        json: ${{ secrets.FIREBASE_JSON }}
+
     - name: Run notify script
       env:
         EMAIL: ${{ secrets.EMAIL }}

@@ -1,5 +1,6 @@
 import os
 import time
+import json
 from collections import defaultdict
 
 import yagmail
@@ -7,7 +8,7 @@ import firebase_admin
 from dotenv import load_dotenv
 from firebase_admin import credentials, db
 
-cred = credentials.Certificate(os.getcwd() + "/server/readready-14b96-firebase-adminsdk-xmh3d-5b309e7202.json")
+cred = credentials.Certificate(os.getcwd() + "secrets.json")
 firebase_admin.initialize_app(
     cred,
     {
