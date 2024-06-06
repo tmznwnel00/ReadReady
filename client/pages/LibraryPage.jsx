@@ -37,7 +37,8 @@ export default function LibraryPage({ route, navigation }) {
         <SafeAreaView style={styles.container}>
             <View style={styles.progressContainer}>
                 <Text style={styles.title}>Library</Text>
-                <ScrollView contentContainerStyle={styles.scrollViewContent}>
+                <View style={styles.scrollViewContainer}>
+                <ScrollView style={styles.scrollViewContent}>
                     {books.map((book, index) => (
                         <View key={index} style={styles.bookCard}>
                             <Text style={styles.bookTitle}>{book.title}</Text>
@@ -49,6 +50,7 @@ export default function LibraryPage({ route, navigation }) {
                         </View>
                     ))}
                 </ScrollView>
+                </View>
             </View>
             <Navbar navigation={navigation} />
         </SafeAreaView>
@@ -70,9 +72,14 @@ const styles = StyleSheet.create({
         fontSize: 40,
         marginBottom: 20,
     },
-    scrollViewContent: {
+    scrollViewContainer: {
         alignItems: 'center',
+        width: '80%',
+    },
+    scrollViewContent: {
+       
         height: 600,
+        width: '100%',
     },
     bookCard: {
         width: '100%',

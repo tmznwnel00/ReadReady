@@ -3,7 +3,6 @@ import { StyleSheet, View, Text, TextInput, SafeAreaView, TouchableOpacity } fro
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ProgressBar } from 'react-native-paper'; // Import ProgressBar
 import Navbar from '../assets/components/Navbar';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Import Icon from vector icons
 
 export default function ProgressPage({ route, navigation }) {
     const { itemId } = route.params;
@@ -11,6 +10,7 @@ export default function ProgressPage({ route, navigation }) {
     const [totalPages, setTotalPages] = useState('');
     const [username, setUsername] = useState('');
     const [libraryId, setLibraryId] = useState(null);
+    const [bookTitle, setBookTitle] = useState('');
 
     useEffect(() => {
         const loadUsername = async () => {
@@ -32,6 +32,7 @@ export default function ProgressPage({ route, navigation }) {
                         setCurrentPage(book.currentPage.toString());
                         setTotalPages(book.fullPage.toString());
                         setLibraryId(book.libraryId);
+                        setBookTitle(book.title); // Set the book title
                     }
                 }
             } catch (error) {
@@ -137,6 +138,7 @@ export default function ProgressPage({ route, navigation }) {
         <SafeAreaView style={styles.container}>
             <View style={styles.progressContainer}>
                 <Text style={styles.title}>Progress</Text>
+                <Text style={styles.bookTitle}>{bookTitle}</Text>
                 <View style={styles.pagesContainer}>
                     <TextInput
                         style={styles.input}
@@ -186,11 +188,17 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 20,
-        marginTop: 120,
+        marginTop: 50,
     },
     title: {
         marginTop: '20%',
         fontSize: 40,
+    },
+    bookTitle: {
+        fontSize: 20,
+        marginBottom: 20,
+        marginTop: 50,
+        fontWeight: 800,
     },
     input: {
         fontSize: 15,
