@@ -8,7 +8,7 @@ import firebase_admin
 from dotenv import load_dotenv
 from firebase_admin import credentials, db
 
-cred = credentials.Certificate(os.getcwd() + "secrets.json")
+cred = credentials.Certificate(os.getcwd() + "/secrets.json")
 firebase_admin.initialize_app(
     cred,
     {
