@@ -31,10 +31,3 @@ class Book(models.Model):
     def __str__(self):
         return self.title
 
-class DailyReadingProgress(models.Model):
-    username = models.CharField(max_length=150)
-    date = models.DateField()
-    pages_read = models.IntegerField()
-
-    class Meta:
-        unique_together = ('username', 'date')
