@@ -376,7 +376,7 @@ def user_books_analysis(request):
     books_ref = db.reference('/books')
     
     for key, value in query.items():
-        book_id = value['itemId']
+        item_id = value['itemId']
         book_info = books_ref.child(str(item_id)).get()
         if book_info:
             category = book_info.get('categoryName')
