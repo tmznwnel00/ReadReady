@@ -346,16 +346,22 @@ def record_pages(request):
         full_page = library_data.get('fullPage', 0)
         new_page = current_page + page
 
+        today = timezone.now().strftime('%Y-%m-%d')
+        daily_progress = library_data.get('dailyProgress', {})
+        daily_progress[today] = daily_progress.get(today, 0) + page
+
         if new_page >= full_page:
             db.reference('/library').child(library_id).update({
                 'currentPage': new_page,
                 'status': "finished"
+                'dailyProgress': daily_progress
             })
             db.reference('/library').child(library_id).delete()
             return JsonResponse({'message': 'Book finished and removed from library'})
         else:
             db.reference('/library').child(library_id).update({
                 'currentPage': new_page
+                'dailyProgress': daily_progress
             })
             return JsonResponse({'message': 'Reading page value is updated'})
 
@@ -395,25 +401,6 @@ def user_books_analysis(request):
 
     return HttpResponse(pie_chart.render(), content_type='image/svg+xml')
 
-@csrf_exempt
-def record_daily_progress(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        username = data.get('username')
-        pages_read = int(data.get('pages_read'))
-
-        today = timezone.now().date()
-        progress, created = DailyReadingProgress.objects.get_or_create(username=username, date=today)
-        if created:
-            progress.pages_read = pages_read
-        else:
-            progress.pages_read += pages_read
-        progress.save()
-
-        return JsonResponse({'message': 'Daily progress recorded'})
-
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
-
 def daily_progress_graph(request):
     username = request.GET.get('username')
     if not username:
@@ -421,16 +408,20 @@ def daily_progress_graph(request):
     
     today = timezone.now().date()
     start_date = today - timedelta(days=6)
-    daily_data = DailyReadingProgress.objects.filter(username=username, date__range=[start_date, today])
+    ref = db.reference('/library')
+    query = ref.order_by_child('username').equal_to(username).get()
 
     days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     date_to_day = { (today - timedelta(days=i)).strftime('%Y-%m-%d'): days[(today - timedelta(days=i)).weekday()] for i in range(7)}
 
     daily_pages = {date_to_day[(today - timedelta(days=i)).strftime('%Y-%m-%d')]: 0 for i in range(7)}
 
-    for entry in daily_data:
-        day = date_to_day[entry.date.strftime('%Y-%m-%d')]
-        daily_pages[day] = entry.pages_read
+    for key, value in query.items():
+        if 'dailyProgress' in value:
+            for date, pages in value['dailyProgress'].items():
+                if date in date_to_day:
+                    day = date_to_day[date]
+                    daily_pages[day] += pages
 
     custom_style = Style(
         colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765')
@@ -442,3 +433,4 @@ def daily_progress_graph(request):
         bar_chart.add(day, pages)
 
     return HttpResponse(bar_chart.render(), content_type='image/svg+xml')
+
