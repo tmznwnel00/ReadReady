@@ -368,16 +368,22 @@ def user_books_analysis(request):
     
     ref = db.reference('/library')
     query = ref.order_by_child('username').equal_to(username).get()
-    category_count = {}
 
+    if not query:
+        return JsonResponse({'error': 'No entries found for the given username'}, status=404)
+    
+    category_count = {}
+    books_ref = db.reference('/books')
+    
     for key, value in query.items():
         book_id = value['itemId']
-        book_info = Book.objects.get(item_id=book_id)
-        category = book_info.category.name
-        if category in category_count:
-            category_count[category] += 1
-        else:
-            category_count[category] = 1
+        book_info = books_ref.child(str(item_id)).get()
+        if book_info:
+            category = book_info.get('categoryName')
+            if category in category_count:
+                category_count[category] += 1
+            else:
+                category_count[category] = 1
 
     custom_style = Style(
         colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765')
