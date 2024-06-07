@@ -288,6 +288,8 @@ def library(request):
             query = ref.order_by_child('username').equal_to(username).get()
             library_books = []
             for key, value in query.items():
+                if value['status'] != "reading":
+                    continue
                 book_info = books_ref.child(str(value['itemId'])).get()
                 if book_info:
                     value.update({
