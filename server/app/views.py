@@ -400,3 +400,38 @@ def user_books_analysis(request):
 
     return HttpResponse(pie_chart.render(), content_type='image/svg+xml')
 
+@csrf_exempt
+def daily_progress_graph(request):
+    username = request.GET.get('username')
+    if not username:
+        return JsonResponse({'error': 'username is required'}, status=400)
+
+    current_time = timezone.now()
+    start_date = current_time - timedelta(days=7)
+    ref = db.reference('/log')
+    query = ref.order_by_child('username').equal_to(username).get()
+
+    if not query:
+        return JsonResponse({'error': 'No log entries found for the given username'}, status=404)
+
+    daily_pages = {day: 0 for day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']}
+
+     for key, value in query.items():
+        log_date = timezone.datetime.fromtimestamp(value['date'])
+        if log_date >= start_date:
+            day_of_week = log_date.strftime('%a')
+            if day_of_week in daily_pages:
+                daily_pages[day_of_week] += value['addedPage']
+    
+    custom_style = Style(
+        colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765')
+    )
+
+    bar_chart = pygal.Bar(style=custom_style)
+    bar_chart.title = f"Daily Reading Progress for {username} (Last 7 days)"
+    for day, pages in daily_pages.items():
+        bar_chart.add(day, pages)
+
+    return HttpResponse(bar_chart.render(), content_type='image/svg+xml')
+                
+
