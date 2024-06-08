@@ -226,7 +226,7 @@ def crud_posting(request):
         return JsonResponse({'message': 'New posting created'})
     elif request.method == 'GET':
         query = ref.order_by_child('createdAt').limit_to_last(10)
-        return JsonResponse(query.get())
+        return JsonResponse(query.get(), safe=False) 
     
 
     return JsonResponse({'error': 'Invalid request or missing data'}, status=400)

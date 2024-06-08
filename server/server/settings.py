@@ -146,5 +146,7 @@ firebase_admin.initialize_app(
 RUN_INDEXING_ON_STARTUP = True
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8081" 
+    "http://localhost:8081",
 ]
+
+X_FRAME_OPTIONS = 'ALLOWALL'

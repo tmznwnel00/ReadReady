@@ -1,6 +1,17 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Picker, SafeAreaView, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Picker, SafeAreaView, ScrollView, Platform } from 'react-native';
 import Navbar from '../assets/components/Navbar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { WebView } from 'react-native-webview';
+
+// Fallback component for Web using iframe
+const WebFallback = ({ uri }) => (
+  <iframe
+    src={uri}
+    style={styles.iframe}
+    title="Graph"
+  />
+);
 
 export default function ProfilePage({ navigation }) {
     const [currentPassword, setCurrentPassword] = useState('');
@@ -8,9 +19,18 @@ export default function ProfilePage({ navigation }) {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [emailNotification, setEmailNotification] = useState('daily');
     const [preferredCategory, setPreferredCategory] = useState('fiction');
+    const [username, setUsername] = useState('');
+
+    useEffect(() => {
+        const fetchUsername = async () => {
+            const storedUsername = await AsyncStorage.getItem('username');
+            setUsername(storedUsername);
+        };
+
+        fetchUsername();
+    }, []);
 
     const handleSaveChanges = () => {
-        // Placeholder for save changes functionality
         console.log('Changes saved');
     };
 
@@ -79,6 +99,42 @@ export default function ProfilePage({ navigation }) {
                 <TouchableOpacity style={styles.saveButton} onPress={handleSaveChanges}>
                     <Text style={styles.saveButtonText}>Save Changes</Text>
                 </TouchableOpacity>
+
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Books Analysis Graph</Text>
+                    <View style={styles.graphContainer}>
+                        {username ? (
+                            Platform.OS === 'web' ? (
+                                <WebFallback uri={`http://127.0.0.1:8000/analysis?username=${username}`} />
+                            ) : (
+                                <WebView
+                                    source={{ uri: `http://127.0.0.1:8000/analysis?username=${username}` }}
+                                    style={styles.graph}
+                                />
+                            )
+                        ) : (
+                            <Text>Loading...</Text>
+                        )}
+                    </View>
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Daily Progress Graph (Last 7 days)</Text>
+                    <View style={styles.graphContainer}>
+                        {username ? (
+                            Platform.OS === 'web' ? (
+                                <WebFallback uri={`http://127.0.0.1:8000/daily_progress_graph?username=${username}`} />
+                            ) : (
+                                <WebView
+                                    source={{ uri: `http://127.0.0.1:8000/daily_progress_graph?username=${username}` }}
+                                    style={styles.graph}
+                                />
+                            )
+                        ) : (
+                            <Text>Loading...</Text>
+                        )}
+                    </View>
+                </View>
             </ScrollView>
             <Navbar navigation={navigation} />
         </SafeAreaView>
@@ -102,7 +158,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center', 
     },
     section: {
-        marginBottom: 50,
+        marginBottom: 40,
     },
     sectionTitle: {
         fontSize: 20,
@@ -132,10 +188,30 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 10,
         alignItems: 'center',
-        marginTop: 20,
+        marginBottom: 40,
     },
     saveButtonText: {
         color: '#fff',
         fontSize: 18,
+    },
+    graphContainer: {
+        height: 400,  
+    },
+    graph: {
+        flex: 1,
+    },
+    fallbackContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: 400,
+    },
+    fallbackText: {
+        fontSize: 18,
+        color: '#666',
+    },
+    iframe: {
+        width: '100%',
+        height: '100%',
+        borderWidth: 0,
     },
 });
