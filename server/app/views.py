@@ -10,7 +10,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from datetime import timedelta
-from .models import Book, Category, DailyReadingProgress
+from .models import Book, Category
 
 import bcrypt
 from dotenv import load_dotenv
