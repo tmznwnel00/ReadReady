@@ -342,26 +342,25 @@ def record_pages(request):
         if not library_data:
             return JsonResponse({'error': 'Library entry not found'}, status=404)
 
-        current_page = library_data.get('currentPage', 0)
         full_page = library_data.get('fullPage', 0)
-        new_page = current_page + page
 
-        today = timezone.now().strftime('%Y-%m-%d')
-        daily_progress = library_data.get('dailyProgress', {})
-        daily_progress[today] = daily_progress.get(today, 0) + page
+        db.reference('/log').push({
+                'username': library_data.get('username'),
+                'itemId': library_data.get('itemId'),
+                'libraryId': library_id,
+                'addedPage': page,
+                'date': time.time()
+        })
 
-        if new_page >= full_page:
+        if page >= full_page:
             db.reference('/library').child(library_id).update({
-                'currentPage': new_page,
+                'currentPage': page,
                 'status': "finished"
-                'dailyProgress': daily_progress
             })
-            db.reference('/library').child(library_id).delete()
             return JsonResponse({'message': 'Book finished and removed from library'})
         else:
             db.reference('/library').child(library_id).update({
-                'currentPage': new_page
-                'dailyProgress': daily_progress
+                'currentPage': page
             })
             return JsonResponse({'message': 'Reading page value is updated'})
 
@@ -400,37 +399,4 @@ def user_books_analysis(request):
         pie_chart.add(category, count)
 
     return HttpResponse(pie_chart.render(), content_type='image/svg+xml')
-
-def daily_progress_graph(request):
-    username = request.GET.get('username')
-    if not username:
-        return JsonResponse({'error': 'username is required'}, status=400)
-    
-    today = timezone.now().date()
-    start_date = today - timedelta(days=6)
-    ref = db.reference('/library')
-    query = ref.order_by_child('username').equal_to(username).get()
-
-    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    date_to_day = { (today - timedelta(days=i)).strftime('%Y-%m-%d'): days[(today - timedelta(days=i)).weekday()] for i in range(7)}
-
-    daily_pages = {date_to_day[(today - timedelta(days=i)).strftime('%Y-%m-%d')]: 0 for i in range(7)}
-
-    for key, value in query.items():
-        if 'dailyProgress' in value:
-            for date, pages in value['dailyProgress'].items():
-                if date in date_to_day:
-                    day = date_to_day[date]
-                    daily_pages[day] += pages
-
-    custom_style = Style(
-        colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765')
-    )
-
-    bar_chart = pygal.Bar(style=custom_style)
-    bar_chart.title = 'Pages Read Over the Last 7 Days'
-    for day, pages in daily_pages.items():
-        bar_chart.add(day, pages)
-
-    return HttpResponse(bar_chart.render(), content_type='image/svg+xml')
 
