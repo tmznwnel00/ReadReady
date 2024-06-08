@@ -3,6 +3,15 @@ import os
 import json
 import time
 
+import pygal
+from pygal.style import Style
+from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+from datetime import timedelta
+from .models import Book, Category
+
 import bcrypt
 from dotenv import load_dotenv
 from django.contrib.auth import authenticate, login, logout
@@ -363,6 +372,75 @@ def record_pages(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
+def user_books_analysis(request):
+    username = request.GET.get('username')
+    if not username:
+        return JsonResponse({'error': 'username is required'}, status=400)
+    
+    ref = db.reference('/library')
+    query = ref.order_by_child('username').equal_to(username).get()
+
+    if not query:
+        return JsonResponse({'error': 'No entries found for the given username'}, status=404)
+    
+    category_count = {}
+    books_ref = db.reference('/books')
+    
+    for key, value in query.items():
+        item_id = value['itemId']
+        book_info = books_ref.child(str(item_id)).get()
+        if book_info:
+            category = book_info.get('categoryName')
+            if category in category_count:
+                category_count[category] += 1
+            else:
+                category_count[category] = 1
+
+    custom_style = Style(
+        colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765')
+    )
+
+    pie_chart = pygal.Pie(style=custom_style, inner_radius=.4)
+    for category, count in category_count.items():
+        pie_chart.add(category, count)
+
+    return HttpResponse(pie_chart.render(), content_type='image/svg+xml')
+
+@csrf_exempt
+def daily_progress_graph(request):
+    username = request.GET.get('username')
+    if not username:
+        return JsonResponse({'error': 'username is required'}, status=400)
+
+    current_time = timezone.now()
+    start_date = current_time - timedelta(days=7)
+    ref = db.reference('/log')
+    query = ref.order_by_child('username').equal_to(username).get()
+
+    if not query:
+        return JsonResponse({'error': 'No log entries found for the given username'}, status=404)
+
+    daily_pages = {day: 0 for day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']}
+
+    for key, value in query.items():
+        log_date = timezone.make_aware(timezone.datetime.fromtimestamp(value['date']), timezone.get_current_timezone())
+        if log_date >= start_date:
+            day_of_week = log_date.strftime('%a')
+            if day_of_week in daily_pages:
+                daily_pages[day_of_week] += value['addedPage']
+    
+    custom_style = Style(
+        colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765')
+    )
+
+    bar_chart = pygal.Bar(style=custom_style)
+    bar_chart.title = f"Daily Reading Progress for {username} (Last 7 days)"
+    for day, pages in daily_pages.items():
+        bar_chart.add(day, pages)
+
+    return HttpResponse(bar_chart.render(), content_type='image/svg+xml')
+
+
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def comments(request):
@@ -399,3 +477,4 @@ def comments(request):
         return JsonResponse({'message': 'Comment created', 'commentId': new_comment_key})
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
