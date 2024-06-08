@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, SafeAreaView, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ProgressBar } from 'react-native-paper'; // Import ProgressBar
 import Navbar from '../assets/components/Navbar';
 
 export default function ProgressPage({ route, navigation }) {
@@ -9,6 +10,7 @@ export default function ProgressPage({ route, navigation }) {
     const [totalPages, setTotalPages] = useState('');
     const [username, setUsername] = useState('');
     const [libraryId, setLibraryId] = useState(null);
+    const [bookTitle, setBookTitle] = useState('');
 
     useEffect(() => {
         const loadUsername = async () => {
@@ -30,6 +32,7 @@ export default function ProgressPage({ route, navigation }) {
                         setCurrentPage(book.currentPage.toString());
                         setTotalPages(book.fullPage.toString());
                         setLibraryId(book.libraryId);
+                        setBookTitle(book.title); // Set the book title
                     }
                 }
             } catch (error) {
@@ -128,10 +131,14 @@ export default function ProgressPage({ route, navigation }) {
         }
     };
 
+    const progress = totalPages ? (currentPage / totalPages) : 0;
+    const progressPercentage = Math.round(progress * 100);
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.progressContainer}>
                 <Text style={styles.title}>Progress</Text>
+                <Text style={styles.bookTitle}>{bookTitle}</Text>
                 <View style={styles.pagesContainer}>
                     <TextInput
                         style={styles.input}
@@ -152,6 +159,14 @@ export default function ProgressPage({ route, navigation }) {
                 <TouchableOpacity style={styles.submit} onPress={updateBookProgress}>
                     <Text style={styles.submitText}>Submit</Text>
                 </TouchableOpacity>
+                <View style={styles.progressBarContainer}>
+                    <ProgressBar 
+                        progress={progress} 
+                        color="#000"
+                        style={styles.progressBar} 
+                    />
+                    <Text style={styles.progressText}>{progressPercentage}%</Text>
+                </View>
             </View>
             <Navbar navigation={navigation} />
         </SafeAreaView>
@@ -165,18 +180,25 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     progressContainer: {
-        justifyContent: 'center',
         alignItems: 'center',
+        flex: 1,
+        marginTop: 20,
     },
     pagesContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 20,
-        marginTop: 120,
+        marginTop: 50,
     },
     title: {
         marginTop: '20%',
         fontSize: 40,
+    },
+    bookTitle: {
+        fontSize: 20,
+        marginBottom: 20,
+        marginTop: 50,
+        fontWeight: 800,
     },
     input: {
         fontSize: 15,
@@ -185,6 +207,22 @@ const styles = StyleSheet.create({
         width: 120,
         textAlign: 'center',
         marginHorizontal: 30,
+    },
+    progressBarContainer: {
+        width: '80%',
+        alignItems: 'center',
+        marginTop: 100,
+        position: 'relative',
+    },
+    progressBar: {
+        width: '100%',
+        height: 30,
+    },
+    progressText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#000',
+        marginTop: -10,
     },
     submit: {
         backgroundColor: '#000',

@@ -236,7 +236,10 @@ def book_recommendation(request):
     ref = db.reference('/books')
     data = []
     result = recommendation(query)
-    sample = random.sample(result, 5)
+    if len(result) >= 5:
+        sample = random.sample(result, 5)
+    else:
+        sample = result
     for book in sample:
         data.append(ref.child(str(book)).get())
     return JsonResponse({'message': data})
@@ -294,6 +297,8 @@ def library(request):
             query = ref.order_by_child('username').equal_to(username).get()
             library_books = []
             for key, value in query.items():
+                if value['status'] != "reading":
+                    continue
                 book_info = books_ref.child(str(value['itemId'])).get()
                 if book_info:
                     value.update({
@@ -366,6 +371,7 @@ def record_pages(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
 def user_books_analysis(request):
     username = request.GET.get('username')
     if not username:
@@ -433,5 +439,42 @@ def daily_progress_graph(request):
         bar_chart.add(day, pages)
 
     return HttpResponse(bar_chart.render(), content_type='image/svg+xml')
-                
+
+
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def comments(request):
+    if request.method == 'GET':
+        parent_post = request.GET.get('parentPost')
+        if not parent_post:
+            return JsonResponse({'error': 'Missing parentPost'}, status=400)
+
+        ref = db.reference('/comments')
+        try:
+            all_comments = ref.order_by_child('parentPost').equal_to(parent_post).get()
+            return JsonResponse(all_comments, safe=False)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    elif request.method == 'POST':
+        data = json.loads(request.body)
+        parent_post = data.get('parentPost')
+        username = data.get('username')
+        content = data.get('content')
+        created_at = data.get('createdAt', time.time())
+
+        if not parent_post or not username or not content:
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+
+        ref = db.reference('/comments')
+        new_comment = ref.push({
+            'parentPost': parent_post,
+            'username': username,
+            'content': content,
+            'createdAt': created_at
+        })
+        new_comment_key = new_comment.key
+        return JsonResponse({'message': 'Comment created', 'commentId': new_comment_key})
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 

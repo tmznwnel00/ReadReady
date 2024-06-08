@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Image, ScrollView, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text, Image, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
 import Navbar from '../assets/components/Navbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -52,11 +52,11 @@ export default function HomePage({ route, navigation }) {
                 <Text style={styles.recommendationTitle}>Recommendation</Text>
                 <ScrollView vertical={true} style={styles.recommendationsScrollView}>
                     {recommendations.map((book, index) => (
-                        <View key={index} style={styles.bookCard}>
+                        <TouchableOpacity key={index} style={styles.bookCard} onPress={() => navigation.navigate('Detail', { book })}> 
                             <Text style={styles.bookTitle}>{book.title}</Text>
                             <Text style={styles.bookAuthor}>{book.author}</Text>
                             {/*<Text style={styles.bookRating}>{book.rating}</Text>*/}
-                        </View>
+                        </TouchableOpacity>
                     ))}
                 </ScrollView>
                 <View style={styles.bookShelfContainer}>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Navbar from '../assets/components/Navbar';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function CommunityPage({ navigation, route }) {
   const [posts, setPosts] = useState([]);
@@ -11,6 +12,12 @@ export default function CommunityPage({ navigation, route }) {
   useEffect(() => {
     fetchPosts();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchPosts();
+    }, [])
+  );
 
   useEffect(() => {
     if (route.params?.newPost) {
@@ -64,8 +71,9 @@ export default function CommunityPage({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>COMMUNITY</Text>
       <ScrollView vertical={true} contentContainerStyle={styles.postsList}>
+      <Text style={styles.title}>COMMUNITY</Text>
+      
         {posts.map((post, index) => (
           <TouchableOpacity key={index} onPress={() => navigation.navigate('PostDetail', { post })}>
             <View style={styles.postCard}>
@@ -75,6 +83,16 @@ export default function CommunityPage({ navigation, route }) {
               </View>
               <Text style={styles.postTitle}>{post.title}</Text>
               <Text style={styles.postContent}>{truncateContent(post.content, 20)}</Text>
+              <View style={styles.interactionContainer}>
+                <View style={styles.iconTextContainer}>
+                  <Icon name="thumb-up-outline" size={20} color="#000" />
+                  <Text style={styles.iconText}>{post.like || 0}</Text>
+                </View>
+                <View style={styles.iconTextContainer}>
+                  <Icon name="comment-outline" size={20} color="#000" />
+                  <Text style={styles.iconText}>{post.comment || 0}</Text>
+                </View>
+              </View>
             </View>
           </TouchableOpacity>
         ))}
@@ -105,7 +123,7 @@ const styles = StyleSheet.create({
     width: '100%',
     flexGrow: 1,
     justifyContent: 'flex-start' ,
-    height: 600,
+    height: 700,
   },
   postCard: {
     backgroundColor: '#FFFFFF',
@@ -141,6 +159,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 30,
   },
+  interactionContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 10,
+  },
+  iconTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  iconText: {
+    marginLeft: 5,
+    fontSize: 16,
+    color: '#000',
+  },
   addButton: {
     backgroundColor: '#000',
     marginHorizontal: '10%',
@@ -154,5 +187,5 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontSize: 20,
     color: '#fff',
-  }
+  },
 });

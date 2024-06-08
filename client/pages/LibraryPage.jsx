@@ -13,7 +13,8 @@ export default function LibraryPage({ route, navigation }) {
                 const response = await fetch(`http://127.0.0.1:8000/library?username=${storedUsername}`);
                 const data = await response.json();
                 if (response.ok) {
-                    setBooks(data.library);
+                    const readingBooks = data.library.filter(book => book.status === 'reading');
+                    setBooks(readingBooks);
                 } else {
                     console.error('Failed to fetch books:', data.error);
                 }
@@ -37,7 +38,8 @@ export default function LibraryPage({ route, navigation }) {
         <SafeAreaView style={styles.container}>
             <View style={styles.progressContainer}>
                 <Text style={styles.title}>Library</Text>
-                <ScrollView contentContainerStyle={styles.scrollViewContent}>
+                <View style={styles.scrollViewContainer}>
+                <ScrollView style={styles.scrollViewContent}>
                     {books.map((book, index) => (
                         <View key={index} style={styles.bookCard}>
                             <Text style={styles.bookTitle}>{book.title}</Text>
@@ -49,6 +51,7 @@ export default function LibraryPage({ route, navigation }) {
                         </View>
                     ))}
                 </ScrollView>
+                </View>
             </View>
             <Navbar navigation={navigation} />
         </SafeAreaView>
@@ -70,12 +73,17 @@ const styles = StyleSheet.create({
         fontSize: 40,
         marginBottom: 20,
     },
-    scrollViewContent: {
+    scrollViewContainer: {
         alignItems: 'center',
+        width: '80%',
+    },
+    scrollViewContent: {
+       
         height: 600,
+        width: '100%',
     },
     bookCard: {
-        width: '90%',
+        width: '100%',
         padding: 20,
         marginVertical: 10,
         backgroundColor: '#fff',
