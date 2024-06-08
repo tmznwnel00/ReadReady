@@ -6,7 +6,7 @@ const Navbar = ({ navigation }) => {
     return (
         <View style={styles.navbarContainer}>
 
-                <Icon name="clipboard-edit-outline" style={styles.navIcon} onPress={() => navigation.navigate('Home')}/>
+                <Icon name="bookshelf" style={styles.navIcon} onPress={() => navigation.navigate('Library')}/>
 
                 <Icon name="magnify" style={styles.navIcon} onPress={() => navigation.navigate('Search')}/>
 

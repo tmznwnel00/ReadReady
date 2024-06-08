@@ -359,3 +359,41 @@ def record_pages(request):
             return JsonResponse({'message': 'Reading page value is updated'})
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def comments(request):
+    if request.method == 'GET':
+        parent_post = request.GET.get('parentPost')
+        if not parent_post:
+            return JsonResponse({'error': 'Missing parentPost'}, status=400)
+
+        ref = db.reference('/comments')
+        try:
+            all_comments = ref.order_by_child('parentPost').equal_to(parent_post).get()
+            return JsonResponse(all_comments, safe=False)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    elif request.method == 'POST':
+        data = json.loads(request.body)
+        parent_post = data.get('parentPost')
+        username = data.get('username')
+        content = data.get('content')
+        created_at = data.get('createdAt', time.time())
+
+        if not parent_post or not username or not content:
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+
+        ref = db.reference('/comments')
+        new_comment = ref.push({
+            'parentPost': parent_post,
+            'username': username,
+            'content': content,
+            'createdAt': created_at
+        })
+        new_comment_key = new_comment.key
+        return JsonResponse({'message': 'Comment created', 'commentId': new_comment_key})
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)

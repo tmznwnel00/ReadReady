@@ -8,7 +8,6 @@ export default function PostingPage({ route, navigation }) {
     const [content, setContent] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [username, setUsername] = useState('');
-
     useEffect(() => {
         const loadUsername = async () => {
             const storedUsername = await AsyncStorage.getItem('username');
@@ -55,9 +54,6 @@ export default function PostingPage({ route, navigation }) {
         console.error('Error adding/updating post:', error);
       }
     };
-    
-    
-    
 
     return (
         <SafeAreaView style={styles.container}>

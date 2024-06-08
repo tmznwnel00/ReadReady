@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, TextInput, Button, Alert } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, TextInput, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Navbar from '../assets/components/Navbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DeleteConfirmationModal from '../assets/components/DeleteConfirmationModal';  // Import the custom modal
 
 export default function PostingDetailPage({ route, navigation }) {
     const { post } = route.params;
-    const [likes, setLikes] = useState(post.likes || 0);
-    const [comments, setComments] = useState(post.comments || []);
+    const [likes, setLikes] = useState(post.like || 0);
+    const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
     const [currentUser, setCurrentUser] = useState(null);
+    const [modalVisible, setModalVisible] = useState(false);  // State for modal visibility
 
     useEffect(() => {
         const loadUser = async () => {
@@ -18,51 +20,89 @@ export default function PostingDetailPage({ route, navigation }) {
         };
 
         loadUser();
+        fetchPostData();
+        fetchComments();
     }, []);
 
-    const handleLike = () => {
-        const updatedLikes = likes + 1;
-        setLikes(updatedLikes);
-        fetch(`http://127.0.0.1:8000/posting/${post.id}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'like' })
-        }).catch(error => console.error('Error updating likes:', error));
+    const fetchPostData = async () => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/posting?postingId=${post.id}`);
+            const updatedPost = await response.json();
+            setLikes(updatedPost.like || 0);
+        } catch (error) {
+            console.error('Error fetching post data:', error);
+        }
     };
 
-    const handleComment = () => {
-        const commentData = { username: currentUser, content: newComment };
+    const fetchComments = async () => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/comments?parentPost=${post.id}`);
+            const data = await response.json();
+            if (response.ok) {
+                const commentsArray = Object.keys(data).map(key => ({
+                    id: key,
+                    ...data[key]
+                }));
+                setComments(commentsArray);
+            } else {
+                console.error('Error fetching comments:', data);
+            }
+        } catch (error) {
+            console.error('Error fetching comments:', error);
+        }
+    };
+
+    const handleLike = async () => {
+        try {
+            await fetch(`http://127.0.0.1:8000/posting?postingId=${post.id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'like' })
+            });
+            setLikes(likes + 1);
+        } catch (error) {
+            console.error('Error updating likes:', error);
+        }
+    };
+
+    const handleComment = async () => {
+        const commentData = { username: currentUser, content: newComment, parentPost: post.id, createdAt: Date.now() / 1000 };
         const updatedComments = [...comments, commentData];
         setComments(updatedComments);
         setNewComment('');
-        fetch(`http://127.0.0.1:8000/posting/${post.id}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'comment', username: currentUser, content: newComment })
-        }).catch(error => console.error('Error updating comments:', error));
+        try {
+            await fetch(`http://127.0.0.1:8000/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(commentData)
+            });
+        } catch (error) {
+            console.error('Error updating comments:', error);
+        }
     };
 
     const handleDelete = () => {
-        Alert.alert(
-            "Delete Post",
-            "Are you sure you want to delete this post?",
-            [
-                { text: "Cancel", style: "cancel" },
-                { text: "OK", onPress: () => deletePost() }
-            ]
-        );
+        console.log('handleDelete called');
+        setModalVisible(true);  // Show the modal
     };
 
-    const deletePost = () => {
-        fetch(`http://127.0.0.1:8000/posting/${post.id}`, {
-            method: 'DELETE'
-        })
-        .then(response => response.json())
-        .then(() => {
+    const deletePost = async () => {
+        try {
+            console.log('Sending DELETE request to:', `http://127.0.0.1:8000/posting?postingId=${post.id}`);
+            const response = await fetch(`http://127.0.0.1:8000/posting?postingId=${post.id}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            console.log('Delete response status:', response.status);
+            if (!response.ok) throw new Error('Failed to delete the post');
             Alert.alert('Post Deleted', 'Your post has been deleted.');
-            navigation.goBack();  // Go back to the previous screen
-        })
-        .catch(error => console.error('Error deleting post:', error));
+            navigation.goBack();
+        } catch (error) {
+            console.error('Error deleting post:', error);
+            Alert.alert('Error', 'Failed to delete the post');
+        } finally {
+            setModalVisible(false);  // Hide the modal
+        }
     };
 
     const navigateToModify = () => {
@@ -72,8 +112,7 @@ export default function PostingDetailPage({ route, navigation }) {
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>COMMUNITY</Text>
-            
-                <ScrollView style={styles.content}>
+            <ScrollView style={styles.content}>
                 <View style={styles.scrollviewContainer}>
                     <View style={styles.nameContainer}>
                         <Icon name="account-circle" style={styles.profileIcon} />
@@ -82,48 +121,55 @@ export default function PostingDetailPage({ route, navigation }) {
                     <Text style={styles.postTitle}>{post.title}</Text>
                     <Text style={styles.fullContent}>{post.content}</Text>
                     <View style={styles.interactionContainer}>
-                        {currentUser != post.username && (
+                        {currentUser !== post.username && (
                             <TouchableOpacity style={styles.likeButton} onPress={handleLike}>
                                 <Icon name="thumb-up" size={20} color="#fff" />
                                 <Text style={styles.likeText}>{likes} Likes</Text>
                             </TouchableOpacity>
                         )}
                         {currentUser === post.username && (
-                            <TouchableOpacity style={styles.modifyButton} onPress={navigateToModify}>
-                                <Icon name="pencil" size={20} color="#fff" />
-                                <Text style={styles.modifyButtonText}>Modify</Text>
-                            </TouchableOpacity>
-                        )}
-                        {currentUser === post.username && (
-                            <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-                                <Icon name="delete" size={20} color="#fff" />
-                                <Text style={styles.deleteButtonText}>Delete</Text>
-                            </TouchableOpacity>
+                            <>
+                                <TouchableOpacity style={styles.modifyButton} onPress={navigateToModify}>
+                                    <Icon name="pencil" size={20} color="#fff" />
+                                    <Text style={styles.modifyButtonText}>Modify</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+                                    <Icon name="delete" size={20} color="#fff" />
+                                    <Text style={styles.deleteButtonText}>Delete</Text>
+                                </TouchableOpacity>
+                            </>
                         )}
                     </View>
                     <Text style={styles.sectionTitle}>Comments</Text>
                     <View style={styles.commentsContainer}>
-                        {comments.map((comment, index) => (
-                            <View key={index} style={styles.comment}>
-                                <Text style={styles.commentUser}>{comment.username}:</Text>
-                                <Text style={styles.commentContent}>{comment.content}</Text>
-                            </View>
-                        ))}
                         <TextInput
                             style={styles.commentInput}
                             placeholder="Add a comment"
                             value={newComment}
                             onChangeText={setNewComment}
                         />
-                        <Button title="Comment" onPress={handleComment} />
+                        <TouchableOpacity style={styles.commentButton} onPress={handleComment}>
+                            <Text style={styles.commentText}>Comment</Text>
+                        </TouchableOpacity>
+                        {comments.map((comment, index) => (
+                            <View key={index} style={styles.comment}>
+                                <Text style={styles.commentUser}>{comment.username}:</Text>
+                                <Text style={styles.commentContent}>{comment.content}</Text>
+                            </View>
+                        ))}
                     </View>
-                    </View>
-                </ScrollView>
-            
+                </View>
+            </ScrollView>
+            <DeleteConfirmationModal  // Include the custom modal
+                visible={modalVisible}
+                onConfirm={deletePost}
+                onCancel={() => setModalVisible(false)}
+            />
             <Navbar navigation={navigation} />
         </SafeAreaView>
     );
 }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -132,20 +178,20 @@ const styles = StyleSheet.create({
     },
     scrollviewContainer: {
         width: '80%',
-        alignSelf:'center',
+        alignSelf: 'center',
     },
     content: {
         marginTop: 10,
         height: 600,
-        alignSelf:'center',
-        width:'100%',
+        alignSelf: 'center',
+        width: '100%',
     },
     title: {
-        marginTop: '20%', 
+        marginTop: '20%',
         marginBottom: 30,
         fontSize: 40,
-        fontFamily: 'BIZUDGothic', 
-        alignSelf: 'center', 
+        fontFamily: 'BIZUDGothic',
+        alignSelf: 'center',
     },
     nameContainer: {
         flexDirection: 'row',
@@ -177,7 +223,7 @@ const styles = StyleSheet.create({
     },
     likeButton: {
         flexDirection: 'row',
-        backgroundColor: '#007bff',
+        backgroundColor: '#000',
         padding: 10,
         borderRadius: 5,
         alignItems: 'center',
@@ -189,7 +235,7 @@ const styles = StyleSheet.create({
     },
     modifyButton: {
         flexDirection: 'row',
-        backgroundColor: '#f0ad4e',
+        backgroundColor: '#000',
         padding: 10,
         borderRadius: 5,
         alignItems: 'center',
@@ -200,12 +246,12 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
     deleteButton: {
-        backgroundColor: '#d9534f',
+        backgroundColor: '#000',
         padding: 10,
         borderRadius: 5,
         flexDirection: 'row',
         alignItems: 'center',
-        marginHorizontal: -50, 
+        marginHorizontal: -50,
     },
     deleteButtonText: {
         marginLeft: 5,
@@ -225,6 +271,8 @@ const styles = StyleSheet.create({
     comment: {
         flexDirection: 'row',
         marginBottom: 5,
+        height: 'auto',
+        marginVertical: 30,
     },
     commentUser: {
         fontWeight: 'bold',
@@ -240,5 +288,20 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         padding: 10,
         marginBottom: 10,
+    },
+    commentButton: {
+        backgroundColor: '#000',
+        width: '60%',
+        borderRadius: 5,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 40,
+        alignSelf: 'center',
+        justifyContent: 'center',
+        padding: 10,
+    },
+    commentText: {
+        color: '#fff',
+        fontSize: 20,
     }
 });

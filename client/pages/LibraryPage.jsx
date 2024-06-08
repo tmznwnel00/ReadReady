@@ -13,7 +13,8 @@ export default function LibraryPage({ route, navigation }) {
                 const response = await fetch(`http://127.0.0.1:8000/library?username=${storedUsername}`);
                 const data = await response.json();
                 if (response.ok) {
-                    setBooks(data.library);
+                    const readingBooks = data.library.filter(book => book.status === 'reading');
+                    setBooks(readingBooks);
                 } else {
                     console.error('Failed to fetch books:', data.error);
                 }
