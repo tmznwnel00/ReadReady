@@ -417,7 +417,7 @@ def daily_progress_graph(request):
     daily_pages = {day: 0 for day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']}
 
     for key, value in query.items():
-        log_date = timezone.datetime.fromtimestamp(value['date'])
+        log_date = timezone.make_aware(timezone.datetime.fromtimestamp(value['date']), timezone.get_current_timezone())
         if log_date >= start_date:
             day_of_week = log_date.strftime('%a')
             if day_of_week in daily_pages:
