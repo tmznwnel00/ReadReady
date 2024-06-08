@@ -12,7 +12,7 @@ const Navbar = ({ navigation }) => {
 
                 <Icon name="home-outline" style={styles.navIcon} onPress={() => navigation.navigate('Home')}/>
 
-                <Icon name="account-circle-outline" style={styles.navIcon} onPress={() => navigation.navigate('Library')}/>
+                <Icon name="account-circle-outline" style={styles.navIcon} onPress={() => navigation.navigate('Profile')}/>
 
                 <Icon name="account-group-outline" style={styles.navIcon} onPress={() => navigation.navigate('Community')}/>
 

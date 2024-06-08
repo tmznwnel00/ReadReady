@@ -14,6 +14,7 @@ import LibraryPage from './pages/LibraryPage';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
+import ProfilePage from './pages/ProfilePage';
 
 const Stack = createStackNavigator();
 
@@ -42,6 +43,7 @@ export default function App() {
         <Stack.Screen name="Posting" component={PostingPage} options={{ headerShown: false }}/>
         <Stack.Screen name="PostDetail" component={PostDetailPage} options={{ headerShown: false }}/>
         <Stack.Screen name="Library" component={LibraryPage} options={{ headerShown: false }}/>
+        <Stack.Screen name="Profile" component={ProfilePage} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   )

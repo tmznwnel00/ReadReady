@@ -71,8 +71,9 @@ export default function CommunityPage({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>COMMUNITY</Text>
       <ScrollView vertical={true} contentContainerStyle={styles.postsList}>
+      <Text style={styles.title}>COMMUNITY</Text>
+      
         {posts.map((post, index) => (
           <TouchableOpacity key={index} onPress={() => navigation.navigate('PostDetail', { post })}>
             <View style={styles.postCard}>
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
     width: '100%',
     flexGrow: 1,
     justifyContent: 'flex-start' ,
-    height: 600,
+    height: 700,
   },
   postCard: {
     backgroundColor: '#FFFFFF',
