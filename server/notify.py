@@ -20,7 +20,6 @@ firebase_admin.initialize_app(
 load_dotenv()
 
 period = sys.argv[1]
-print(period)
 
 def send_email(to_email, subject, body):
     yag = yagmail.SMTP(os.getenv('EMAIL'), os.getenv('APP_PASSWORD'))
@@ -46,6 +45,11 @@ for key, value in library.get().items():
              user_dict[value['username']].append(value['itemId'])
              
 for user, book_list in user_dict.items():
+    user_period = users.child(user).get()['period']
+    if user_period is None:
+         continue
+    elif user_period != period:
+         continue
     user_email = users.child(user).get()['email']
     book_str = ''
     for index, book in enumerate(book_list):
