@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import sys
 from collections import defaultdict
 
 import yagmail
@@ -17,6 +18,9 @@ firebase_admin.initialize_app(
 )
 
 load_dotenv()
+
+period = sys.argv[1]
+print(period)
 
 def send_email(to_email, subject, body):
     yag = yagmail.SMTP(os.getenv('EMAIL'), os.getenv('APP_PASSWORD'))

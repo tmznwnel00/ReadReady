@@ -36,4 +36,4 @@ jobs:
       env:
         EMAIL: ${{ secrets.EMAIL }}
         APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
-      run: python server/notify.py
+      run: python server/notify.py Daily
