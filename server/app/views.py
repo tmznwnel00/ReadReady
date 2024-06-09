@@ -478,3 +478,44 @@ def comments(request):
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
+@csrf_exempt
+def change_password(request):
+    data = json.loads(request.body)
+    username = data.get('username')
+    new_password = data.get('new_password')
+    confirm_password = data.get('confirm_password')
+
+    if new_password == confirm_password:
+        hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), fixed_salt).decode('utf-8')
+                    
+        ref = db.reference('/users')
+        ref.child(username).update({
+            'password': hashed_password
+        })
+        return JsonResponse({'message': 'User password is updated'})
+    else:
+        return JsonResponse({'status': "error", 'message': 'Password do not match'}, status=400)
+    
+@csrf_exempt
+def preferred_category(request):
+    data = json.loads(request.body)
+    username = data.get('username')
+    category = data.get('category')
+                        
+    ref = db.reference('/users')
+    ref.child(username).update({
+        'category': category
+    })
+    return JsonResponse({'message': 'User category is updated'})
+
+@csrf_exempt
+def notify_period(request):
+    data = json.loads(request.body)
+    username = data.get('username')
+    period = data.get('period')
+                        
+    ref = db.reference('/users')
+    ref.child(username).update({
+        'period': period
+    })
+    return JsonResponse({'message': 'User period is updated'})

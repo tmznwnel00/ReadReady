@@ -16,9 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from app.views import book_recommendation, book_info, book_search, crud_posting, \
+from app.views import book_recommendation, book_info, book_search, crud_posting, change_password, \
     signup, library, login_user, logout_user, rating_book, record_full_pages, record_pages, \
-    comments, user_books_analysis, daily_progress_graph
+    comments, user_books_analysis, daily_progress_graph, preferred_category, notify_period
 
 urlpatterns = [
     path('signup', signup, name='signup'),
@@ -35,5 +35,8 @@ urlpatterns = [
     path('analysis', user_books_analysis, name='user_books_analysis'),
     path('daily_progress_graph', daily_progress_graph, name='daily_progress_graph'),
     path('comments', comments, name='comments'),
+    path('user/password', change_password, name='change_password'),
+    path('user/category', preferred_category, name='preferred_category'),
+    path('user/period', notify_period, name='notify_period')
 ]
 
