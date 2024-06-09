@@ -45,12 +45,12 @@ for key, value in library.get().items():
              user_dict[value['username']].append(value['itemId'])
              
 for user, book_list in user_dict.items():
-    user_period = users.child(user).get()['period']
-    if user_period is None:
+    user_data = users.child(user).get()
+    if 'period' not in user_data:
          continue
-    elif user_period != period:
+    elif user_data['period'] != period:
          continue
-    user_email = users.child(user).get()['email']
+    user_email = user_data['email']
     book_str = ''
     for index, book in enumerate(book_list):
          title = books.child(str(book)).get()['title']
