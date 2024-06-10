@@ -390,11 +390,13 @@ def user_books_analysis(request):
         item_id = value['itemId']
         book_info = books_ref.child(str(item_id)).get()
         if book_info:
-            category = book_info.get('categoryName')
-            if category in category_count:
-                category_count[category] += 1
-            else:
-                category_count[category] = 1
+            category_full = book_info.get('categoryName')
+            if category_full:
+                category = re.split('>|/', category_full)[-1].strip()
+                if category in category_count:
+                    category_count[category] += 1
+                else:
+                    category_count[category] = 1
 
     custom_style = Style(
         colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765')
@@ -403,6 +405,10 @@ def user_books_analysis(request):
     pie_chart = pygal.Pie(style=custom_style, inner_radius=.4)
     for category, count in category_count.items():
         pie_chart.add(category, count)
+
+    pie_chart.config(font_family='googlefont:Raleway', label_font_size=18, major_label_font_size=20)
+    pie_chart.legent_at_bottom = True
+    pie_chart.legend_box_size = 18
 
     return HttpResponse(pie_chart.render(), content_type='image/svg+xml')
 
