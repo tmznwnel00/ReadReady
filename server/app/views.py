@@ -401,10 +401,11 @@ def user_books_analysis(request):
 
     custom_style = Style(
         colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765'),
+        font_family='googlefont:Raleway',
         label_font_size=0,
         major_label_font_size=0,
         value_font_size=0,
-        legend_font_size=30
+        legend_font_size=25
     )
 
     pie_chart = pygal.Pie(style=custom_style, inner_radius=.4)
