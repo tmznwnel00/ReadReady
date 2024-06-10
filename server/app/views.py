@@ -2,6 +2,7 @@ import random
 import os
 import json
 import time
+import re
 
 import pygal
 from pygal.style import Style
