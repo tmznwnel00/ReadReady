@@ -85,7 +85,7 @@ def recommendation(username, model=model):
 
     book_result = []
     for index, rating in enumerate(predict_rating):
-        if float(rating) >= 0.8:
+        if float(rating) >= 0.5:
             book_result.append(book_list[index])
     return book_result
 
