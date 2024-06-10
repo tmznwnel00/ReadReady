@@ -5,7 +5,6 @@ import time
 import re
 
 import matplotlib.pyplot as plt
-import seaborn as sns
 import io
 import urllib, base64
 
