@@ -2,9 +2,11 @@ import random
 import os
 import json
 import time
+import re
 
 import pygal
 from pygal.style import Style
+
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -390,19 +392,30 @@ def user_books_analysis(request):
         item_id = value['itemId']
         book_info = books_ref.child(str(item_id)).get()
         if book_info:
-            category = book_info.get('categoryName')
-            if category in category_count:
-                category_count[category] += 1
-            else:
-                category_count[category] = 1
+            category_full = book_info.get('categoryName')
+            if category_full:
+                category = re.split('>', category_full)[-1].strip()
+                if category in category_count:
+                    category_count[category] += 1
+                else:
+                    category_count[category] = 1
 
     custom_style = Style(
-        colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765')
+        colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765'),
+        label_font_size=30,
+        major_label_font_size=30,
+        value_font_size=30,
+        tooltip_font_size=30,
+        legend_font_size=30
     )
 
-    pie_chart = pygal.Pie(style=custom_style, inner_radius=.4)
+    pie_chart = pygal.Pie(style=custom_style, inner_radius=.4, legend_at_bottom=True)
+
     for category, count in category_count.items():
         pie_chart.add(category, count)
+
+    pie_chart.show_legend = True
+    pie_chart.legend_box_size = 24
 
     return HttpResponse(pie_chart.render(), content_type='image/svg+xml')
 
@@ -413,34 +426,43 @@ def daily_progress_graph(request):
         return JsonResponse({'error': 'username is required'}, status=400)
 
     current_time = timezone.now()
-    start_date = current_time - timedelta(days=7)
+    start_date = current_time - timedelta(days=6)
     ref = db.reference('/log')
     query = ref.order_by_child('username').equal_to(username).get()
 
     if not query:
         return JsonResponse({'error': 'No log entries found for the given username'}, status=404)
 
-    daily_pages = {day: 0 for day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']}
+    daily_pages = {start_date + timedelta(days=i): 0 for i in range(7)}
 
     for key, value in query.items():
         log_date = timezone.make_aware(timezone.datetime.fromtimestamp(value['date']), timezone.get_current_timezone())
         if log_date >= start_date:
-            day_of_week = log_date.strftime('%a')
-            if day_of_week in daily_pages:
-                daily_pages[day_of_week] += value['addedPage']
+            date_only = log_date.date()
+            if date_only in daily_pages:
+                daily_pages[date_only] += value['addedPage']
     
+    dates = list(daily_pages.keys())
+    pages = list(daily_pages.values())
+    date_labels = [date.strftime('%m/%d') for date in dates]
+
     custom_style = Style(
-        colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765')
+        colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765'),
+        label_font_size=30,
+        major_label_font_size=30,
+        value_font_size=30,
+        legend_font_size=30,
+        tooltip_font_size=30
     )
 
-    bar_chart = pygal.Bar(style=custom_style)
-    bar_chart.title = f"Daily Reading Progress for {username} (Last 7 days)"
-    for day, pages in daily_pages.items():
-        bar_chart.add(day, pages)
+    bar_chart = pygal.Bar(style=custom_style, show_legend=False, x_label_rotation=45)
+    bar_chart.x_labels = date_labels
+
+    for i, pages_read in enumerate(pages):
+        bar_chart.add(date_labels[i], pages_read)
 
     return HttpResponse(bar_chart.render(), content_type='image/svg+xml')
-
-
+    
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def comments(request):
