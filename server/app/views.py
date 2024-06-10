@@ -5,7 +5,7 @@ import time
 import re
 
 import pygal
-from pygal.style impor Style
+from pygal.style import Style
 
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
