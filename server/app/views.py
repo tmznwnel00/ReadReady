@@ -7,10 +7,6 @@ import re
 import pygal
 from pygal.style import Style
 
-import matplotlib.pyplot as plt
-import io
-import urllib, base64
-
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -450,27 +446,23 @@ def daily_progress_graph(request):
     pages = list(daily_pages.values())
     date_labels = [date.strftime('%m/%d') for date in dates]
 
-    fig, ax = plt.subplots()
-    bars = ax.bar(date_labels, pages, color=['#E80080', '#404040', '#9BC850', '#FAB243', '#305765'])
+    custom_style = Style(
+        colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765'),
+        label_font_size=30,
+        major_label_font_size=30,
+        value_font_size=30,
+        legend_font_size=30,
+        tooltip_font_size=30
+    )
+
+    bar_chart = pygal.Bar(style=custom_style, show_legend=False, x_label_rotation=45)
+    bar_chart.x_labels = date_labels
+
+    for i, pages_read in enumerate(pages):
+        bar_chart.add(date_labels[i], pages_read)
+
+    return HttpResponse(bar_chart.render(), content_type='image/svg+xml')
     
-    ax.set_xlabel('Date', fontsize=14, weight='bold')
-    ax.set_ylabel('Pages Read', fontsize=14, weight='bold')
-
-    plt.xticks(fontsize=12, weight='bold')
-    plt.yticks(fontsize=12, weight='bold')
-
-    ax.legend().set_visible(False)
-
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
-    plt.close(fig)
-    buf.seek(0)
-
-    string = base64.b64encode(buf.read())
-    uri = 'data:image/png;base64,' + urllib.parse.quote(string)
-
-    return HttpResponse(f'<img src="{uri}" />')
-
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def comments(request):
