@@ -400,14 +400,17 @@ def user_books_analysis(request):
                     category_count[category] = 1
 
     custom_style = Style(
-        colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765')
+        colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765'),
+        label_font_size=0,
+        major_label_font_size=0,
+        value_font_size=0,
+        legend_font_size=30
     )
 
     pie_chart = pygal.Pie(style=custom_style, inner_radius=.4)
     for category, count in category_count.items():
         pie_chart.add(category, count)
 
-    pie_chart.config(label_font_size=30, major_label_font_size=30, value_font_size=30, legend_font_size=30)
     pie_chart.legend_box_size = 30
 
     return HttpResponse(pie_chart.render(), content_type='image/svg+xml')
