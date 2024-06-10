@@ -33,7 +33,7 @@ urlpatterns = [
     path('library/full_page', record_full_pages, name='full_page'),
     path('library/current_page', record_pages, name='current_page'),
     path('analysis', user_books_analysis, name='user_books_analysis'),
-    path('daily_progress_graph', daily_progress_graph, name='daily_progress_graph')
+    path('daily_progress_graph', daily_progress_graph, name='daily_progress_graph'),
     path('comments', comments, name='comments'),
 ]
 
