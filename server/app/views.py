@@ -4,8 +4,11 @@ import json
 import time
 import re
 
-import pygal
-from pygal.style import Style
+import matplotlib.pyplot as plt
+import seaborn as sns
+import io
+import urllib, base64
+
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -399,23 +402,27 @@ def user_books_analysis(request):
                 else:
                     category_count[category] = 1
 
-    custom_style = Style(
-        colors=('#E80080', '#404040', '#9BC850', '#FAB243', '#305765'),
-        font_family='googlefont:Raleway',
-        label_font_size=0,
-        major_label_font_size=0,
-        value_font_size=0,
-        legend_font_size=25
-    )
+    labels = list(category_count.keys())
+    sizes = list(category_count.values())
+    colors = ['#E80080', '#404040', '#9BC850', '#FAB243', '#305765']
 
-    pie_chart = pygal.Pie(style=custom_style, inner_radius=.4)
-    for category, count in category_count.items():
-        pie_chart.add(category, count)
+    fig, ax = plt.subplots()
+    wedges, texts, autotexts = ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140, textprops=dict(color="w"))
 
-    pie_chart.legend_at_bottom = True
-    pie_chart.legend_box_size = 30
+    ax.legend(wedges, labels,
+              title="Categories",
+              loc="center left",
+              bbox_to_anchor=(1, 0, 0.5, 1))
 
-    return HttpResponse(pie_chart.render(), content_type='image/svg+xml')
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    plt.close(fig)
+    buf.seek(0)
+
+    string = base64.b64encode(buf.read())
+    uri = 'data:image/png;base64,' + urllib.parse.quote(string)
+
+    return HttpResponse(f'<img src="{uri}" />')
 
 @csrf_exempt
 def daily_progress_graph(request):
