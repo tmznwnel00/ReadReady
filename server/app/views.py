@@ -412,7 +412,7 @@ def user_books_analysis(request):
     for category, count in category_count.items():
         pie_chart.add(category, count)
 
-    pie_chart.legend_at_right = True
+    pie_chart.legend_at_top = True
     pie_chart.legend_box_size = 30
 
     return HttpResponse(pie_chart.render(), content_type='image/svg+xml')
