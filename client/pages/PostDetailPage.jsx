@@ -270,9 +270,9 @@ const styles = StyleSheet.create({
     },
     comment: {
         flexDirection: 'row',
-        marginBottom: 5,
         height: 'auto',
-        marginVertical: 30,
+        marginTop: 10,
+        marginBottom: 30,
     },
     commentUser: {
         fontWeight: 'bold',
@@ -288,6 +288,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         padding: 10,
         marginBottom: 10,
+        width: '100%',
     },
     commentButton: {
         backgroundColor: '#000',
@@ -295,7 +296,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 40,
+        marginVertical: 50,
         alignSelf: 'center',
         justifyContent: 'center',
         padding: 10,

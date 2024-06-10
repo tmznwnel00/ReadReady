@@ -496,6 +496,15 @@ def comments(request):
             'createdAt': created_at
         })
         new_comment_key = new_comment.key
+
+        post_ref = db.reference('/community').child(parent_post)
+        post_data = post_ref.get()
+        if post_data:
+            current_comment_count = post_data.get('comment', 0)
+            post_ref.update({
+                'comment': current_comment_count + 1
+            })
+
         return JsonResponse({'message': 'Comment created', 'commentId': new_comment_key})
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
@@ -541,3 +550,16 @@ def notify_period(request):
         'period': period
     })
     return JsonResponse({'message': 'User period is updated'})
+
+@csrf_exempt
+def get_user_data(request):
+    username = request.GET.get('username')
+    if not username:
+        return JsonResponse({'error': 'Username is required'}, status=400)
+    
+    ref = db.reference('/users')
+    user_data = ref.child(username).get()
+    if not user_data:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    
+    return JsonResponse(user_data, safe=False)

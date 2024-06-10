@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Picker, SafeAreaView, ScrollView, Platform } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, SafeAreaView, ScrollView, Alert, Platform } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import Navbar from '../assets/components/Navbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { WebView } from 'react-native-webview';
 
 // Fallback component for Web using iframe
 const WebFallback = ({ uri }) => (
-  <iframe
-    src={uri}
-    style={styles.iframe}
-    title="Graph"
-  />
+  <iframe src={uri} style={styles.iframe} title="Graph" />
 );
 
 export default function ProfilePage({ navigation }) {
@@ -18,20 +15,62 @@ export default function ProfilePage({ navigation }) {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [emailNotification, setEmailNotification] = useState('daily');
-    const [preferredCategory, setPreferredCategory] = useState('fiction');
+    const [preferredCategory, setPreferredCategory] = useState('살림');
     const [username, setUsername] = useState('');
 
     useEffect(() => {
         const fetchUsername = async () => {
             const storedUsername = await AsyncStorage.getItem('username');
             setUsername(storedUsername);
+    
+            // Fetch user data based on stored username
+            const userDataResponse = await fetch(`http://127.0.0.1:8000/user/data?username=${storedUsername}`);
+            const userData = await userDataResponse.json();
+            if (userData) {
+                setEmailNotification(userData.period);
+                setPreferredCategory(userData.category);
+            }
         };
-
+    
         fetchUsername();
     }, []);
+    
+    const handleSaveChanges = async () => {
+        try {
+            if (newPassword !== confirmPassword) {
+                Alert.alert('Error', 'New password and confirm password do not match');
+                return;
+            }
 
-    const handleSaveChanges = () => {
-        console.log('Changes saved');
+            if (currentPassword && newPassword) {
+                await fetch('http://127.0.0.1:8000/user/password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        new_password: newPassword,
+                        confirm_password: confirmPassword
+                    })
+                });
+            }
+
+            await fetch('http://127.0.0.1:8000/user/category', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, category: preferredCategory })
+            });
+
+            await fetch('http://127.0.0.1:8000/user/period', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, period: emailNotification })
+            });
+
+            Alert.alert('Success', 'Changes saved successfully');
+        } catch (error) {
+            console.error('Error saving changes:', error);
+            Alert.alert('Error', 'Failed to save changes');
+        }
     };
 
     return (
@@ -87,11 +126,18 @@ export default function ProfilePage({ navigation }) {
                             style={styles.picker}
                             onValueChange={(itemValue) => setPreferredCategory(itemValue)}
                         >
-                            <Picker.Item label="Fiction" value="fiction" />
-                            <Picker.Item label="Non-Fiction" value="non-fiction" />
-                            <Picker.Item label="Science" value="science" />
-                            <Picker.Item label="History" value="history" />
-                            <Picker.Item label="Biography" value="biography" />
+                            {[
+                                "살림", "음식", "가족&결혼", "패션&뷰티", "건강/취미/스포츠", "경제경영",
+                                "고전", "과학", "공학", "농업", "동식물", "수학", "의학", "만화", "사회과학",
+                                "외국문학작품", "한국문학작품", "문학잡지", "문학이론", "수험서/자격증",
+                                "어린이 이과", "어린이 문과", "어린이 동화/명작/고전", "어린이 문화&예술&인물",
+                                "어린이 일반", "어린이 언어", "에세이", "여행", "역사", "예술/대중문화", "영어",
+                                "일본어", "중국어", "한자", "국어", "기타외국어", "번역/통역", "유아",
+                                "인문학 일반", "철학", "신화", "종교", "심리학", "자기계발", "잡지/전집",
+                                "자녀교육", "청소년", "컴퓨터/모바일"
+                            ].map((category) => (
+                                <Picker.Item label={category} value={category} key={category} />
+                            ))}
                         </Picker>
                     </View>
                 </View>

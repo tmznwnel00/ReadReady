@@ -9,10 +9,6 @@ export default function MainPage({ navigation }) {
             <Image source={require('../assets/Logo.png')} style={styles.logo} />
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate('Search')}
-            ></TouchableOpacity>
-            <TouchableOpacity
-                style={styles.button}
                 onPress={() => navigation.navigate('Login')}
             >
 

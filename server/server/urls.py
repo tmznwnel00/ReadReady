@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from app.views import book_recommendation, book_info, book_search, crud_posting, change_password, \
     signup, library, login_user, logout_user, rating_book, record_full_pages, record_pages, \
-    comments, user_books_analysis, daily_progress_graph, preferred_category, notify_period
+    comments, user_books_analysis, daily_progress_graph, preferred_category, notify_period, get_user_data
 
 urlpatterns = [
     path('signup', signup, name='signup'),
@@ -37,6 +37,7 @@ urlpatterns = [
     path('comments', comments, name='comments'),
     path('user/password', change_password, name='change_password'),
     path('user/category', preferred_category, name='preferred_category'),
-    path('user/period', notify_period, name='notify_period')
+    path('user/period', notify_period, name='notify_period'),
+    path('user/data', get_user_data, name='get_user_data')
 ]
 
