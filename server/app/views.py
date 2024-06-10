@@ -393,7 +393,7 @@ def user_books_analysis(request):
         if book_info:
             category_full = book_info.get('categoryName')
             if category_full:
-                category = re.split('>|/', category_full)[-1].strip()
+                category = re.split('>', category_full)[-1].strip()
                 if category in category_count:
                     category_count[category] += 1
                 else:
