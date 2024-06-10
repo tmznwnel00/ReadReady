@@ -407,8 +407,7 @@ def user_books_analysis(request):
     for category, count in category_count.items():
         pie_chart.add(category, count)
 
-    pie_chart.config(font_family='googlefont:Raleway', label_font_size=300, major_label_font_size=300, value_font_size=300)
-    pie_chart.legend_at_bottom = True
+    pie_chart.config(font_family='googlefont:Raleway', label_font_size=50, major_label_font_size=50, value_font_size=50)
     pie_chart.legend_box_size = 50
 
     return HttpResponse(pie_chart.render(), content_type='image/svg+xml')
