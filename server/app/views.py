@@ -433,14 +433,12 @@ def daily_progress_graph(request):
     if not query:
         return JsonResponse({'error': 'No log entries found for the given username'}, status=404)
 
-    daily_pages = {start_date + timedelta(days=i): 0 for i in range(7)}
+    daily_pages = {start_date.date() + timedelta(days=i): 0 for i in range(7)}
 
     for key, value in query.items():
-        log_date = timezone.make_aware(timezone.datetime.fromtimestamp(value['date']), timezone.get_current_timezone())
-        if log_date >= start_date:
-            date_only = log_date.date()
-            if date_only in daily_pages:
-                daily_pages[date_only] += value['addedPage']
+        log_date = timezone.make_aware(timezone.datetime.fromtimestamp(value['date']), timezone.get_current_timezone()).date()
+        if start_date.date() <= log_date <= current_time.date():
+            daily_pages[log_date] += value['addedPage']
     
     dates = list(daily_pages.keys())
     pages = list(daily_pages.values())
@@ -458,8 +456,7 @@ def daily_progress_graph(request):
     bar_chart = pygal.Bar(style=custom_style, show_legend=False, x_label_rotation=45)
     bar_chart.x_labels = date_labels
 
-    for i, pages_read in enumerate(pages):
-        bar_chart.add(date_labels[i], pages_read)
+    bar_chart.add('Pages Read', pages)
 
     return HttpResponse(bar_chart.render(), content_type='image/svg+xml')
     
