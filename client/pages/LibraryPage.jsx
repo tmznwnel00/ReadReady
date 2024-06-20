@@ -72,6 +72,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 40,
         marginBottom: 20,
+        marginTop:'5%',
     },
     scrollViewContainer: {
         alignItems: 'center',
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
     },
     scrollViewContent: {
        
-        height: 600,
+        height: 650,
         width: '100%',
     },
     bookCard: {

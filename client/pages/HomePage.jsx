@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Image, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
 import Navbar from '../assets/components/Navbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function HomePage({ route, navigation }) {
     const [username, setUsername] = useState('');
@@ -13,60 +14,58 @@ export default function HomePage({ route, navigation }) {
             const storedUsername = await AsyncStorage.getItem('username');
             if (storedUsername) {
                 setUsername(storedUsername);
-                fetchRecommendations(storedUsername.trim())
+                fetchRecommendations(storedUsername.trim());
             }
         };
 
         loadUsername();
-        fetchRecommendations();
     }, []);
 
-    const fetchRecommendations = async () => {
+    const fetchRecommendations = async (username) => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/recommendation?username=.`, {
-                method: 'GET', 
+            const response = await fetch(`http://127.0.0.1:8000/recommendation?username=${username}`, {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 }
             });
             const jsonData = await response.json();
             if (response.ok) {
-                setRecommendations(jsonData.message); 
-                setLoading(false);
+                setRecommendations(jsonData.message);
             } else {
                 throw new Error('Failed to fetch recommendations');
             }
         } catch (error) {
             console.error('Error fetching recommendations:', error);
+        } finally {
             setLoading(false);
         }
     };
 
     return (
         <SafeAreaView style={styles.container}>
-
-        <View style={styles.content}>
-            <Text style={styles.title}>Read, Ready?</Text>
-  
-            <View style={styles.recommendationSection}>
-                <Text style={styles.recommendationTitle}>Recommendation</Text>
-                <ScrollView vertical={true} style={styles.recommendationsScrollView}>
-                    {recommendations.map((book, index) => (
-                        <TouchableOpacity key={index} style={styles.bookCard} onPress={() => navigation.navigate('Detail', { book })}> 
-                            <Text style={styles.bookTitle}>{book.title}</Text>
-                            <Text style={styles.bookAuthor}>{book.author}</Text>
-                            {/*<Text style={styles.bookRating}>{book.rating}</Text>*/}
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
-                <View style={styles.bookShelfContainer}>
-                <Text style={styles.bookshelf}>{username}'s Bookshelf</Text>
+            <View style={styles.content}>
+                <View style={styles.navBar}>
+                    <Icon name="cog" style={styles.navIcon} onPress={() => navigation.navigate('Settings')} />
+                </View>
+                <Text style={styles.title}>Read, Ready?</Text>
+                <View style={styles.recommendationSection}>
+                    <Text style={styles.recommendationTitle}>Recommendation</Text>
+                    <ScrollView vertical={true} style={styles.recommendationsScrollView}>
+                        {recommendations.map((book, index) => (
+                            <TouchableOpacity key={index} style={styles.bookCard} onPress={() => navigation.navigate('Detail', { book })}>
+                                <Text style={styles.bookTitle}>{book.title}</Text>
+                                <Text style={styles.bookAuthor}>{book.author}</Text>
+                                {/*<Text style={styles.bookRating}>{book.rating}</Text>*/}
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                    <View style={styles.bookShelfContainer}>
+                        <Text style={styles.bookshelf}>{username}'s Bookshelf</Text>
+                    </View>
                 </View>
             </View>
-
-            
-        </View>
-        <Navbar navigation={navigation} />
+            <Navbar navigation={navigation} />
         </SafeAreaView>
     );
 }
@@ -82,10 +81,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'flex-start',
     },
+    navBar: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        padding: 16,
+    },
+    navIcon: {
+        fontSize: 30,
+        color: '#000',
+    },
     title: {
         fontSize: 50,
         fontFamily: 'Bokor-Regular',
-        marginTop: '10%',
+        marginTop: '5%',
     },
     bookShelfContainer: {
         backgroundColor: '#2F2F2F',
@@ -96,7 +105,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         position: 'absolute',
         top: '-5%',
-
     },
     bookshelf: {
         fontSize: 17,
@@ -110,8 +118,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#fff',
         borderRadius: 5,
-        padding: 20, 
-        elevation: 5, 
+        padding: 20,
+        elevation: 5,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
@@ -121,7 +129,6 @@ const styles = StyleSheet.create({
         fontSize: 23,
         fontFamily: 'BlackHanSans-Regular',
         marginVertical: 15,
-       
     },
     recommendationsScrollView: {
         width: '100%',
@@ -137,15 +144,15 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 5,
         marginHorizontal: 20,
-        marginVertical:10,
-        alignItems:'center',
+        marginVertical: 10,
+        alignItems: 'center',
         justifyContent: 'center',
     },
     bookCover: {
-        width: 130, 
-        height: 180, 
+        width: 130,
+        height: 180,
         resizeMode: 'contain',
-        marginBottom: 10, 
+        marginBottom: 10,
     },
     bookTitle: {
         color: '#fff',
@@ -158,7 +165,7 @@ const styles = StyleSheet.create({
     bookAuthor: {
         color: '#fff',
         fontSize: 15,
-        marginBottom:10,
+        marginBottom: 10,
         width: '80%',
         textAlign: 'center',
     },
