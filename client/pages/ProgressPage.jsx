@@ -8,6 +8,7 @@ export default function ProgressPage({ route, navigation }) {
     const { itemId } = route.params;
     const [currentPage, setCurrentPage] = useState('');
     const [totalPages, setTotalPages] = useState('');
+    const [initialCurrentPage, setInitialCurrentPage] = useState(''); // Add state to store initial current page
     const [username, setUsername] = useState('');
     const [libraryId, setLibraryId] = useState(null);
     const [bookTitle, setBookTitle] = useState('');
@@ -31,6 +32,7 @@ export default function ProgressPage({ route, navigation }) {
                     if (book) {
                         setCurrentPage(book.currentPage.toString());
                         setTotalPages(book.fullPage.toString());
+                        setInitialCurrentPage(book.currentPage.toString()); // Store the initial current page
                         setLibraryId(book.libraryId);
                         setBookTitle(book.title); // Set the book title
                     }
@@ -60,6 +62,8 @@ export default function ProgressPage({ route, navigation }) {
         }
 
         try {
+            const pagesReadToday = parseInt(currentPage) - parseInt(initialCurrentPage);
+
             if (libraryId) {
                 // Update existing library entry
                 const response1 = await fetch('http://127.0.0.1:8000/library/current_page', {
@@ -69,7 +73,7 @@ export default function ProgressPage({ route, navigation }) {
                     },
                     body: JSON.stringify({
                         libraryId: libraryId,
-                        page: parseInt(currentPage),
+                        page: pagesReadToday, // Send the pages read today
                     }),
                 });
 
