@@ -108,7 +108,7 @@ export default function SettingsPage({ navigation }) {
                     >
                         <Picker.Item label="Daily" value="daily" />
                         <Picker.Item label="Weekly" value="weekly" />
-                        <Picker.Item label="Monthly" value="monthly" />
+                        <Picker.Item label="BiWeekly" value="biweekly" />
                     </Picker>
                 </View>
                 </View>
