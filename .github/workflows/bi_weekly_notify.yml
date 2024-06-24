@@ -1,8 +1,8 @@
 name: Bi-Weekly Notify
 
 on:
-  schedule:
-    - cron: '0 11 */14 * 1'
+#  schedule:
+#    - cron: '0 11 */14 * 1'
   workflow_dispatch:
 
 jobs:
