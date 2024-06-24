@@ -1,8 +1,8 @@
 name: Weekly Notify
 
 on:
-  schedule:
-    - cron: '0 11 * * MON'
+#  schedule:
+#    - cron: '0 11 * * MON'
   workflow_dispatch:
 
 jobs:
